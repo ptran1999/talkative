@@ -1,61 +1,61 @@
-import socket
+from socket import AF_INET, socket, SOCK_STREAM
+from threading import Thread
+
+clients = {}
+addresses = {}
+
+HOST = ''
+PORT = 22
+BUFSIZ = 1024
+ADDR = (HOST, PORT)
+
+SERVER = socket(AF_INET, SOCK_STREAM)
+SERVER.bind(ADDR)
 
 
-# Creating socket
-def create_socket():
-    try:
-        global host
-        global port
-        global s
-        host = socket.gethostname()
-        print(" server will start on host : ", host)
-        port = 9999
-        s = socket.socket()
-
-    except socket.error as msg:
-        print("Socket creation error: " + str(msg))
+# Sets up handling for incoming clients.
+def accept_incoming_connections():
+    while True:
+        client, client_address = SERVER.accept()
+        print("%s:%s has connected." % client_address)
+        client.send(bytes("Welcome to Talkative! \nEnter your name: ", "utf8"))
+        addresses[client] = client_address
+        Thread(target=handle_client, args=(client,)).start()
 
 
-# Binding + listening for connections
-def bind_socket():
-    try:
-        global host
-        global port
-        global s
-
-        s.bind((host, port))
-        print("Binding the Port: " + str(port))
-
-        s.listen(1)
-
-    except socket.error as msg:
-        print("Socket Binding error" + str(msg) + "\n" + "Retrying...")
-        bind_socket()
-
-
-# Establish connection with a client
-# Send message and receive message from the client
-def socket_accept():
-    conn, address = s.accept()
-    print("Connected to server at: " + " IP " + address[0] + " | Port" + str(address[1]))
+# Takes client socket as argument.
+# Handles a single client connection.
+def handle_client(client):
+    name = client.recv(BUFSIZ).decode("utf8")
+    welcome = 'Welcome %s! Type QUIT to exit.' % name
+    client.send(bytes(welcome, "utf8"))
+    msg = "%s has joined the chat!" % name
+    broadcast(bytes(msg, "utf8"))
+    clients[client] = name
 
     while True:
-        message = input(str(">> "))
-        message = message.encode()
-        conn.send(message)
-        print("message has been sent...\n")
-
-        incoming_message = conn.recv(1024)
-        incoming_message = incoming_message.decode()
-        print(" Client : " + incoming_message + "\n")
-
-    conn.close()
-
-
-def main():
-    create_socket()
-    bind_socket()
-    socket_accept()
+        msg = client.recv(BUFSIZ)
+        if msg != bytes("QUIT", "utf8"):
+            broadcast(msg, name + ": ")
+        else:
+            client.send(bytes("QUIT", "utf8"))
+            client.close()
+            del clients[client]
+            broadcast(bytes("%s has left the chat." % name, "utf8"))
+            break
 
 
-main()
+# prefix is for name identification.
+# Broadcasts a message to all the clients.
+def broadcast(msg, prefix=""):
+    for sock in clients:
+        sock.send(bytes(prefix, "utf8") + msg)
+
+
+if __name__ == "__main__":
+    SERVER.listen(5)
+    print("Waiting for connection...")
+    ACCEPT_THREAD = Thread(target=accept_incoming_connections)
+    ACCEPT_THREAD.start()
+    ACCEPT_THREAD.join()
+    SERVER.close()
