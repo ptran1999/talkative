@@ -1,7 +1,7 @@
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter
-
+import tkinter.font
 
 HOST = input('Enter host: ')
 PORT = input('Enter port: ')
@@ -44,24 +44,29 @@ top = tkinter.Tk()
 top.title("Talkative")
 
 messages_frame = tkinter.Frame(top)
+myFont = tkinter.font.Font(family='Helvetica', size=11)
+
 my_msg = tkinter.StringVar()  # For the messages to be sent.
 my_msg.set("Enter message...")
 
 scrollbar = tkinter.Scrollbar(messages_frame)  # To navigate through past messages.
 
 # Following will contain the messages.
-msg_list = tkinter.Listbox(messages_frame, height=15, width=50, yscrollcommand=scrollbar.set)
+msg_list = tkinter.Listbox(messages_frame, yscrollcommand=scrollbar.set, height=20, width=100)
+msg_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
 scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-msg_list.pack(side=tkinter.LEFT, fill=tkinter.BOTH)
+msg_list.pack(side=tkinter.RIGHT, fill=tkinter.BOTH, expand=1)
 msg_list.pack()
-messages_frame.pack()
+messages_frame.pack(fill=tkinter.BOTH, expand=1)
 
-entry_field = tkinter.Entry(top, textvariable=my_msg)
+entry_field = tkinter.Entry(top, textvariable=my_msg, font=myFont,
+                            insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
 entry_field.bind("<Return>", send)
-entry_field.pack()
+entry_field.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
 # Enter button
-send_button = tkinter.Button(top, text="Send", command=send)
-send_button.pack()
+send_button = tkinter.Button(top, font=myFont, text="Send", command=send, bg='#484c52', fg='#c8c9cb')
+send_button.pack(ipadx=5, ipady=5, side=tkinter.LEFT, fill=tkinter.BOTH)
 
 top.protocol("WM_DELETE_WINDOW", on_closing)
 
