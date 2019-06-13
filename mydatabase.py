@@ -12,5 +12,5 @@ db = mysql.connector.connect(
 mycursor = db.cursor()
 
 userInsert = "INSERT INTO User (username, password) VALUES (%s, %s)"
-
+usernameQuery = "SELECT * FROM User WHERE username = %s"
 userQuery = "SELECT * FROM User WHERE username = %s AND password = %s"
