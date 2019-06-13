@@ -5,7 +5,7 @@ clients = {}
 addresses = {}
 
 HOST = ''
-PORT = 22
+PORT = 9999
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 
