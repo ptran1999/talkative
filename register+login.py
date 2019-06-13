@@ -1,4 +1,33 @@
 from tkinter import *
+from tkinter import Entry
+
+from mydatabase import *
+
+
+def delete3():
+    screen3.destroy()
+
+
+def delete4():
+    screen4.destroy()
+
+
+def login_success():
+    global screen3
+    screen3 = Toplevel(screen)
+    screen3.title("Success")
+    screen3.geometry("150x100")
+    Label(screen3, text="Login Success").pack()
+    Button(screen3, text="OK", command=delete3).pack()
+
+
+def user_not_found():
+    global screen4
+    screen4 = Toplevel(screen)
+    screen4.title("Success")
+    screen4.geometry("150x100")
+    Label(screen4, text="User Not Found").pack()
+    Button(screen4, text="OK", command=delete4).pack()
 
 
 def register():
@@ -24,7 +53,24 @@ def register():
     password_entry = Entry(screen1, textvariable=password)
     password_entry.pack()
     Label(screen1, text="").pack()
-    Button(screen1, text="Register", width=10, height=1).pack()
+    Button(screen1, text="Register", width=10, height=1, command=register_user).pack()
+
+
+def register_user():
+    print("working")
+
+    username_info = username.get()
+    password_info = password.get()
+
+    temp_user = (username_info, password_info)
+
+    mycursor.execute(userInsert, temp_user)
+    db.commit()
+
+    username_entry.delete(0, END)
+    password_entry.delete(0, END)
+
+    Label(screen1, text="Registration Sucess", fg="green", font=("calibri", 11)).pack()
 
 
 def login():
@@ -52,7 +98,25 @@ def login():
     password_entry1 = Entry(screen2, textvariable=password_verify)
     password_entry1.pack()
     Label(screen2, text="").pack()
-    Button(screen2, text="Login", width=10, height=1).pack()
+    Button(screen2, text="Login", width=10, height=1, command=login_verify).pack()
+
+
+def login_verify():
+    username_info = username_verify.get()
+    password_info = password_verify.get()
+
+    temp_user = (username_info, password_info)
+
+    username_entry1.delete(0, END)
+    password_entry1.delete(0, END)
+
+    mycursor.execute(userQuery, temp_user)
+    msg = mycursor.fetchone()
+
+    if msg:
+        login_success()
+    else:
+        user_not_found()
 
 
 def main_screen():
