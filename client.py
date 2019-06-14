@@ -1,17 +1,7 @@
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
-import tkinter
-import tkinter.font
-
-HOST = input('Enter host: ')
-PORT = input('Enter port: ')
-if not PORT:
-    PORT = 9999
-else:
-    PORT = int(PORT)
-
-BUFSIZ = 1024
-ADDR = (HOST, PORT)
+from tkinter import *
+from tkinter import font, Tk, Listbox
 
 
 # Handles receiving of messages
@@ -19,7 +9,7 @@ def receive():
     while True:
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
-            msg_list.insert(tkinter.END, msg)
+            msg_list.insert(END, msg)
         except OSError:  # Possibly client has left the chat.
             break
 
@@ -31,7 +21,7 @@ def send(event=None):  # event is passed by binders.
     client_socket.send(bytes(msg, "utf8"))
     if msg == "QUIT":
         client_socket.close()
-        top.quit()
+        client_gui.quit()
 
 
 # This function is to be called when the window is closed
@@ -40,54 +30,72 @@ def on_closing(event=None):
     send()
 
 
-top = tkinter.Tk()
-top.title("Talkative")
+def main_GUI():
+    # Input Host and Port
+    global HOST
+    global PORT
+    HOST = '127.0.0.1'
+    PORT = 9999
 
-# Frame declarations
-talkative_frame = tkinter.Frame(top)
-user_frame = tkinter.Frame(talkative_frame)
-messages_frame = tkinter.Frame(talkative_frame)
+    global BUFSIZ
+    BUFSIZ = 1024
+    global ADDR
+    ADDR = (HOST, PORT)
 
-talkative_frame.pack(fill=tkinter.BOTH, expand=1)
-myFont = tkinter.font.Font(family='Helvetica', size=11)
+    # GUI part begin
+    global client_gui
+    client_gui = Tk()
+    client_gui.title("Talkative")
+    # Frame declarations
+    talkative_frame = Frame(client_gui)
+    user_frame = Frame(talkative_frame)
+    messages_frame = Frame(talkative_frame)
 
-my_msg = tkinter.StringVar()  # For the messages to be sent.
-my_msg.set("Enter message...")
+    talkative_frame.pack(fill=BOTH, expand=1)
+    myFont = font.Font(family='Helvetica', size=11)
 
-scrollbar1 = tkinter.Scrollbar(messages_frame)  # To navigate through past messages.
+    global my_msg  # For the messages to be sent.
+    my_msg = StringVar()
+    my_msg.set("Enter message...")
 
-# Following will contain the messages.
-msg_list = tkinter.Listbox(messages_frame, yscrollcommand=scrollbar1.set, height=20, width=75)
-msg_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-scrollbar1.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-msg_list.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
-messages_frame.pack(side=tkinter.RIGHT, fill=tkinter.BOTH, expand=1)
+    scrollbar1 = Scrollbar(messages_frame)  # To navigate through past messages.
 
-scrollbar2 = tkinter.Scrollbar(user_frame)  # To navigate through currently connected users.
+    # Following will contain the messages.
+    global msg_list
+    msg_list = Listbox(messages_frame, yscrollcommand=scrollbar1.set, height=20, width=75)
+    msg_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
+    scrollbar1.pack(side=RIGHT, fill=Y)
+    msg_list.pack(side=TOP, fill=BOTH, expand=1)
+    messages_frame.pack(side=RIGHT, fill=BOTH, expand=1)
 
-# Connected user list
-user_list = tkinter.Listbox(user_frame, yscrollcommand=scrollbar2.set, height=20, width=25)
-user_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-scrollbar2.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-user_list.pack(side=tkinter.RIGHT, fill=tkinter.BOTH, expand=1)
-user_frame.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
+    scrollbar2 = Scrollbar(user_frame)  # To navigate through currently connected users.
 
-# User input field and entry button
-entry_field = tkinter.Entry(messages_frame, textvariable=my_msg, font=myFont,
-                            insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
-entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
-entry_field.bind("<Return>", send)
-entry_field.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
-# Enter button
-send_button = tkinter.Button(messages_frame, font=myFont, text="Send", command=send, bg='#484c52', fg='#c8c9cb')
-send_button.pack(ipadx=5, ipady=5, side=tkinter.RIGHT, fill=tkinter.BOTH)
+    # Connected user list
+    user_list = Listbox(user_frame, yscrollcommand=scrollbar2.set, height=20, width=25)
+    user_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
+    scrollbar2.pack(side=RIGHT, fill=Y)
+    user_list.pack(side=RIGHT, fill=BOTH, expand=1)
+    user_frame.pack(side=LEFT, fill=BOTH, expand=1)
 
-top.protocol("WM_DELETE_WINDOW", on_closing)
+    # User input field and entry button
+    entry_field = Entry(messages_frame, textvariable=my_msg, font=myFont,
+                        insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+    entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
+    entry_field.bind("<Return>", send)
+    entry_field.pack(side=LEFT, fill=BOTH, expand=1)
 
-client_socket = socket(AF_INET, SOCK_STREAM)
-client_socket.connect(ADDR)
+    # Enter button
+    send_button = Button(messages_frame, font=myFont, text="Send", command=send, bg='#484c52', fg='#c8c9cb')
+    send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
 
-receive_thread = Thread(target=receive)
-receive_thread.start()
+    client_gui.protocol("WM_DELETE_WINDOW", on_closing)
 
-tkinter.mainloop()  # Starts GUI execution.
+    global client_socket
+    client_socket = socket(AF_INET, SOCK_STREAM)
+    client_socket.connect(ADDR)
+
+    receive_thread = Thread(target=receive)
+    receive_thread.start()
+
+    mainloop()
+main_GUI()

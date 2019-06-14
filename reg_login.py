@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import Entry
-
 from mydatabase import *
 
 
@@ -138,7 +137,7 @@ def login_success():
     screen3.title("Talkative")
     screen3.geometry("300x250")
     Label(screen3, text="Successfully login!", fg="green", font=("calibri", 11)).pack()
-    Button(screen3, text="OK", command=delete3).pack()
+    Button(screen3, text="OK", command=delete0_2_3).pack()
 
 
 def user_not_found():
@@ -155,12 +154,18 @@ def delete1_5():
     screen5.destroy()
 
 
+def delete0_2_3():
+    screen2.destroy()
+    screen3.destroy()
+
+
 def delete3():
     screen3.destroy()
 
 
 def delete4():
     screen4.destroy()
+
 
 def delete6():
     screen6.destroy()
@@ -178,6 +183,3 @@ def main_screen():
     Button(text="Register", height="2", width="30", command=register).pack()
 
     screen.mainloop()
-
-
-main_screen()

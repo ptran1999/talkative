@@ -16,10 +16,10 @@ SERVER.bind(ADDR)
 # Sets up handling for incoming clients.
 def accept_incoming_connections():
     while True:
-        client, client_address = SERVER.accept()
-        print("%s:%s has connected." % client_address)
+        client, address = SERVER.accept()
+        print("%s:%s has connected." % address)
         client.send(bytes("Welcome to Talkative! \nEnter your name: ", "utf8"))
-        addresses[client] = client_address
+        addresses[client] = address
         Thread(target=handle_client, args=(client,)).start()
 
 
