@@ -5,6 +5,7 @@ Status Report #1
 Talkative
 
 Members
+
 Sean O’Meara -spo17
 
 Kevin Tran - kt16m
@@ -12,6 +13,7 @@ Kevin Tran - kt16m
 Phat Tran - ptt17
 
 Elle Braddy - cjb17e
+
 
 Current Progress
 
@@ -25,6 +27,7 @@ Current Progress
   
   -We have a main chat room that is visible to all connected user of which messages can be seen between users.
   
+  
 Future Plans
 
   -We are currently trying to connect to a cloud server for the database
@@ -36,8 +39,10 @@ Future Plans
   -We will also create the ability to find users to add to the friends list
   
   -We are also going to make it so we can connect 2 users individually to each other.
+  
 
 This is where we will be done with the major parts of the project, we plan on arriving here by the start of July. After this we will attempt to add other additional functions to the project such as:
+
 
   -Make a message history between individual users
   
