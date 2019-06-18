@@ -32,7 +32,7 @@ def on_closing(event=None):
 
 if __name__ == "__main__":
 
-    login_window = reg_log()
+    login_window = reg_login()
 
     login_window.main_screen()
 

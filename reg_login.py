@@ -3,7 +3,7 @@ from tkinter import Entry
 from mydatabase import *
 
 
-class reg_log:
+class reg_login:
 
     def __init__(self):
         self.flag = False
