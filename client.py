@@ -194,7 +194,7 @@ class reg_login:
         self.screen.destroy()
 
     def connect(self):
-        self.HOST = '127.0.0.1'
+        self.HOST = 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
         self.PORT = 9999
 
         self.BUFSIZ = 1024
