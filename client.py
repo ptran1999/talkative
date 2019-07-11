@@ -1,16 +1,18 @@
 from tkinter import *
 from tkinter import Entry
-from mydatabase import *
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 from tkinter import font
-
+from userDB import userDB
 
 class reg_login:
 
     def __init__(self):
         self.screen = Tk()
         self.client_socket = socket(AF_INET, SOCK_STREAM)
+        self.users = userDB()
+
+
 
     def main_screen(self):
         self.screen.geometry("300x250")
@@ -57,8 +59,7 @@ class reg_login:
         temp_name = (username_info,)
 
         # Query if username already exist in the db
-        mycursor.execute(usernameQuery, temp_name)
-        msg = mycursor.fetchone()
+        msg = self.users.username_query(temp_name[0])
 
         if msg:
             self.register_fail()
@@ -67,8 +68,8 @@ class reg_login:
 
     def register_success(self):
         # insert temp_user to db
-        mycursor.execute(userInsert, self.temp_user1)
-        db.commit()
+        self.users.user_insert(self.temp_user1[0], self.temp_user1[1])
+
 
         self.screen5 = Toplevel(self.screen)
         self.screen5.title("Talkative")
@@ -123,8 +124,8 @@ class reg_login:
         self.password_entry1.delete(0, END)
 
         # Query if user exist in the db
-        mycursor.execute(userQuery, temp_user)
-        msg = mycursor.fetchone()
+        msg = self.users.username_query(temp_user[0])
+
 
         if msg:
             self.login_success()
@@ -139,8 +140,11 @@ class reg_login:
         Label(self.screen3, text="Successfully login!", fg="green", font=("calibri", 11)).pack()
         Button(self.screen3, text="OK", command=self.delete0_2_3).pack()
 
-        mycursor.execute(getUserId, self.temp_username)
-        self.userId = mycursor.fetchone()
+        # TODO get userID
+        self.userid = self.users.get_user_id(self.temp_username[0])
+        # mycursor.execute(getUserId, self.temp_username)
+        # self.userId = mycursor.fetchone()
+
 
     def user_not_found(self):
         self.screen4 = Toplevel(self.screen)
@@ -222,69 +226,70 @@ class reg_login:
         self.msg_list.pack(side=TOP, fill=BOTH, expand=1)
         self.messages_frame.pack(side=RIGHT, fill=BOTH, expand=1)
 
-        scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
-        scrollbar3 = Scrollbar(self.user_frame)
-
-        # Connected user list
-        self.tempFriend = StringVar()
-        self.findUser_Entry = Entry(self.user_frame, textvariable=self.tempFriend)
-
-        self.friend_list = Listbox(self.user_frame, yscrollcommand=scrollbar2.set, height=10, width=25)
-        self.friend_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-
-        self.request_list = Listbox(self.user_frame, yscrollcommand=scrollbar3.set, height=10, width=25)
-        self.request_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-
-        # Accept and decline button
-        accept_b = Button(self.user_frame, text="Accept", command=self.accept_request)
-        decline_b = Button(self.user_frame, text="Decline", command=self.decline_request)
-
-        # Display data of request list
-        mycursor.execute(getFriendRequestList, self.userId)
-        temp_list = mycursor.fetchall()
-        request_tuple = ()
-
-        for i in temp_list:
-            request_tuple += i
-
-        request_l = list(request_tuple)
-
-        for i in request_l:
-            self.request_list.insert(END, i)
-
-        # Display data of friend list
-        mycursor.execute(getFriendList, self.userId + self.userId)
-        temp_list = mycursor.fetchall()
-        friend_tuple = ()
-
-        for i in temp_list:
-            friend_tuple += i
-
-        friend_l = list(friend_tuple)
-
-        for i in friend_l:
-            self.friend_list.insert(END, i)
-
+        # TODO reimplment all of this
+        # scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
+        # scrollbar3 = Scrollbar(self.user_frame)
+        #
+        # # Connected user list
+        # self.tempFriend = StringVar()
+        # self.findUser_Entry = Entry(self.user_frame, textvariable=self.tempFriend)
+        #
+        # self.friend_list = Listbox(self.user_frame, yscrollcommand=scrollbar2.set, height=10, width=25)
+        # self.friend_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
+        #
+        # self.request_list = Listbox(self.user_frame, yscrollcommand=scrollbar3.set, height=10, width=25)
+        # self.request_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
+        #
+        # # Accept and decline button
+        # accept_b = Button(self.user_frame, text="Accept", command=self.accept_request)
+        # decline_b = Button(self.user_frame, text="Decline", command=self.decline_request)
+        #
+        # # Display data of request list
+        # mycursor.execute(getFriendRequestList, self.userId)
+        # temp_list = mycursor.fetchall()
+        # request_tuple = ()
+        #
+        # for i in temp_list:
+        #     request_tuple += i
+        #
+        # request_l = list(request_tuple)
+        #
+        # for i in request_l:
+        #     self.request_list.insert(END, i)
+        #
+        # # Display data of friend list
+        # mycursor.execute(getFriendList, self.userId + self.userId)
+        # temp_list = mycursor.fetchall()
+        # friend_tuple = ()
+        #
+        # for i in temp_list:
+        #     friend_tuple += i
+        #
+        # friend_l = list(friend_tuple)
+        #
+        # for i in friend_l:
+        #     self.friend_list.insert(END, i)
+        #
         # Greetings and display user info (design later)
         Label(self.user_frame, text="Welcome, " + self.username_info).pack()
-
-        # Search for other user
-        Label(self.user_frame, text="Find friend: ").pack()
-        self.findUser_Entry.pack()
-        Button(self.user_frame, text="Search", command=self.searchFriend).pack()
-
-        # Display user's friend list
-        scrollbar2.pack(side=RIGHT, fill=Y)
-        self.friend_list.pack(side=RIGHT, fill=BOTH, expand=1)
-
-        # Display friend request from other users
-        scrollbar3.pack(side=RIGHT, fill=Y)
-        self.request_list.pack(side=RIGHT, fill=BOTH, expand=1)
-        accept_b.pack(side=TOP)
-        decline_b.pack(side=TOP)
-
-        self.user_frame.pack(side=LEFT, fill=BOTH, expand=1)
-
+        #
+        # # Search for other user
+        # Label(self.user_frame, text="Find friend: ").pack()
+        # self.findUser_Entry.pack()
+        # Button(self.user_frame, text="Search", command=self.searchFriend).pack()
+        #
+        # # Display user's friend list
+        # scrollbar2.pack(side=RIGHT, fill=Y)
+        # self.friend_list.pack(side=RIGHT, fill=BOTH, expand=1)
+        #
+        # # Display friend request from other users
+        # scrollbar3.pack(side=RIGHT, fill=Y)
+        # self.request_list.pack(side=RIGHT, fill=BOTH, expand=1)
+        # accept_b.pack(side=TOP)
+        # decline_b.pack(side=TOP)
+        #
+        # self.user_frame.pack(side=LEFT, fill=BOTH, expand=1)
+        #
         # User input field and entry button
         entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont,
                             insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
@@ -303,77 +308,77 @@ class reg_login:
         receive_thread.start()
         self.client_gui.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-    def searchFriend(self):
-        # Get the input and find the user
-        self.foundFriend = self.tempFriend.get()
-
-        self.findUser_Entry.delete(0, END)
-
-        self.temp_friend_name = (self.foundFriend,)
-        mycursor.execute(usernameQuery, self.temp_friend_name)
-        msg = mycursor.fetchone()
-
-        if msg:
-            # Pop up if the user is found
-            self.friendPopUp = Toplevel(self.client_gui)
-            self.friendPopUp.geometry("200x100")
-            Label(self.friendPopUp, text=self.foundFriend).pack()
-            Button(self.friendPopUp, text="Add", command=self.addFriend).pack()
-        else:
-            # Yield error if user is not in the database
-            self.friendPopUp = Toplevel(self.client_gui)
-            self.friendPopUp.geometry("200x100")
-            Label(self.friendPopUp, text="User " + self.foundFriend + " does not exist!", fg="red").pack()
-            Button(self.friendPopUp, text="Cancel", command=self.friendPopUp.destroy).pack()
-
-    def addFriend(self):
-        # Get the friend id and check if already add
-        mycursor.execute(getUserId, self.temp_friend_name)
-        friendId = mycursor.fetchone()
-
-        exist_rela = self.userId + friendId + self.userId + friendId
-        request = self.userId + friendId + (0,)
-
-        mycursor.execute(relationshipQuery, exist_rela)
-        msg = mycursor.fetchall()
-
-        if msg:
-            # Error if already add this person
-            Label(self.friendPopUp, text="Already add " + self.foundFriend + " !!!", fg="red").pack()
-            Button(self.friendPopUp, text="OK", command=self.friendPopUp.destroy).pack()
-        else:
-            if friendId != self.userId:
-                mycursor.execute(addFriend, request)
-                db.commit()
-                Label(self.friendPopUp, text="Successfully add friend!", fg="green").pack()
-                Button(self.friendPopUp, text="OK", command=self.friendPopUp.destroy).pack()
-            else:
-                # Error trying to add oneself
-                Label(self.friendPopUp, text="Cannot add yourself!", fg="red").pack()
-                Button(self.friendPopUp, text="OK", command=self.friendPopUp.destroy).pack()
-
-    def accept_request(self):
-        # Switch status in relationship database from 0 to 1
-        select = self.request_list.curselection()
-        for i in select:
-            temp = (self.request_list.get(i),)
-            mycursor.execute(getUserId, temp)
-            tempId = mycursor.fetchone()
-            mycursor.execute(acceptRequest, tempId + self.userId)
-            db.commit()
-            self.request_list.delete(i)
-        self.friend_list.insert(END, temp)
-
-    def decline_request(self):
-        # Delete the relationship row if the request is decline
-        select = self.request_list.curselection()
-        for i in select:
-            temp = (self.request_list.get(i),)
-            mycursor.execute(getUserId, temp)
-            tempId = mycursor.fetchone()
-            mycursor.execute(declineRequest, tempId + self.userId)
-            db.commit()
-            self.request_list.delete(i)
+    # def searchFriend(self):
+    #     # Get the input and find the user
+    #     self.foundFriend = self.tempFriend.get()
+    #
+    #     self.findUser_Entry.delete(0, END)
+    #
+    #     self.temp_friend_name = (self.foundFriend,)
+    #     mycursor.execute(usernameQuery, self.temp_friend_name)
+    #     msg = mycursor.fetchone()
+    #
+    #     if msg:
+    #         # Pop up if the user is found
+    #         self.friendPopUp = Toplevel(self.client_gui)
+    #         self.friendPopUp.geometry("200x100")
+    #         Label(self.friendPopUp, text=self.foundFriend).pack()
+    #         Button(self.friendPopUp, text="Add", command=self.addFriend).pack()
+    #     else:
+    #         # Yield error if user is not in the database
+    #         self.friendPopUp = Toplevel(self.client_gui)
+    #         self.friendPopUp.geometry("200x100")
+    #         Label(self.friendPopUp, text="User " + self.foundFriend + " does not exist!", fg="red").pack()
+    #         Button(self.friendPopUp, text="Cancel", command=self.friendPopUp.destroy).pack()
+    #
+    # def addFriend(self):
+    #     # Get the friend id and check if already add
+    #     mycursor.execute(getUserId, self.temp_friend_name)
+    #     friendId = mycursor.fetchone()
+    #
+    #     exist_rela = self.userId + friendId + self.userId + friendId
+    #     request = self.userId + friendId + (0,)
+    #
+    #     mycursor.execute(relationshipQuery, exist_rela)
+    #     msg = mycursor.fetchall()
+    #
+    #     if msg:
+    #         # Error if already add this person
+    #         Label(self.friendPopUp, text="Already add " + self.foundFriend + " !!!", fg="red").pack()
+    #         Button(self.friendPopUp, text="OK", command=self.friendPopUp.destroy).pack()
+    #     else:
+    #         if friendId != self.userId:
+    #             mycursor.execute(addFriend, request)
+    #             db.commit()
+    #             Label(self.friendPopUp, text="Successfully add friend!", fg="green").pack()
+    #             Button(self.friendPopUp, text="OK", command=self.friendPopUp.destroy).pack()
+    #         else:
+    #             # Error trying to add oneself
+    #             Label(self.friendPopUp, text="Cannot add yourself!", fg="red").pack()
+    #             Button(self.friendPopUp, text="OK", command=self.friendPopUp.destroy).pack()
+    #
+    # def accept_request(self):
+    #     # Switch status in relationship database from 0 to 1
+    #     select = self.request_list.curselection()
+    #     for i in select:
+    #         temp = (self.request_list.get(i),)
+    #         mycursor.execute(getUserId, temp)
+    #         tempId = mycursor.fetchone()
+    #         mycursor.execute(acceptRequest, tempId + self.userId)
+    #         db.commit()
+    #         self.request_list.delete(i)
+    #     self.friend_list.insert(END, temp)
+    #
+    # def decline_request(self):
+    #     # Delete the relationship row if the request is decline
+    #     select = self.request_list.curselection()
+    #     for i in select:
+    #         temp = (self.request_list.get(i),)
+    #         mycursor.execute(getUserId, temp)
+    #         tempId = mycursor.fetchone()
+    #         mycursor.execute(declineRequest, tempId + self.userId)
+    #         db.commit()
+    #         self.request_list.delete(i)
 
 
 if __name__ == "__main__":
