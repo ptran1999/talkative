@@ -8,11 +8,16 @@ from userDB import userDB
 class reg_login:
 
     def __init__(self):
+        self.HOST = 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
+        self.PORT = 9999
+
+        self.BUFSIZ = 1024
+        self.ADDR = (self.HOST, self.PORT)
+
         self.screen = Tk()
         self.client_socket = socket(AF_INET, SOCK_STREAM)
+        self.client_socket.connect(self.ADDR)
         self.users = userDB()
-
-
 
     def main_screen(self):
         self.screen.geometry("300x250")
@@ -49,27 +54,31 @@ class reg_login:
 
         # Go to register_user when done
         Button(self.screen1, text="Register", width=10, height=1, command=self.register_user).pack()
+        option = "REGISTER"
+        self.client_socket.send(option.encode())
 
     def register_user(self):
+        option = "REGISTER"
+
         # get the info from register and put it to a temp_user
         username_info = self.username.get()
         password_info = self.password.get()
 
-        self.temp_user1 = (username_info, password_info)
-        temp_name = (username_info,)
+        self.client_socket.send(username_info.encode())
+        self.client_socket.send(password_info.encode())
 
-        # Query if username already exist in the db
-        msg = self.users.username_query(temp_name[0])
 
-        if msg:
+        # FAILED_TO_REGISTER will be sent if failed
+        # REGISTER_SUCCESS will be sent if passed
+        result = self.client_socket.recv(self.BUFSIZ).decode()
+
+        if result == "FAILED_TO_REGISTER" :
             self.register_fail()
         else:
             self.register_success()
 
     def register_success(self):
         # insert temp_user to db
-        self.users.user_insert(self.temp_user1[0], self.temp_user1[1])
-
 
         self.screen5 = Toplevel(self.screen)
         self.screen5.title("Talkative")
@@ -113,24 +122,34 @@ class reg_login:
 
         # Go to login_verify when done
         Button(self.screen2, text="Login", width=10, height=1, command=self.login_verify).pack()
+        option = "LOGIN"
+        self.client_socket.send(option.encode())
 
     def login_verify(self):
+        option = "LOGIN"
+
         self.username_info = self.username_verify.get()
         password_info = self.password_verify.get()
 
-        temp_user = (self.username_info, password_info)
         self.temp_username = (self.username_info,)
         self.username_entry1.delete(0, END)
         self.password_entry1.delete(0, END)
 
-        # Query if user exist in the db
-        msg = self.users.username_query(temp_user[0])
+
+        self.client_socket.send(self.username_info.encode())
+        self.client_socket.send(password_info.encode())
+
+        # This is the result that will be received from the server
+        # FAILED_LOGIN will be sent if failed
+        # PASS_LOGIN will be sent if passed
+        msg = self.client_socket.recv(self.BUFSIZ).decode()
 
 
-        if msg:
+        if msg == "PASS_LOGIN":
             self.login_success()
             self.connect()
         else:
+            self.client_socket.send(option.encode())
             self.user_not_found()
 
     def login_success(self):
@@ -174,7 +193,7 @@ class reg_login:
     def receive(self):
         while True:
             try:
-                msg = self.client_socket.recv(self.BUFSIZ).decode("utf8")
+                msg = self.client_socket.recv(self.BUFSIZ).decode()
                 self.msg_list.insert(END, msg)
             except OSError:  # Possibly client has left the chat.
                 break
@@ -183,7 +202,7 @@ class reg_login:
     def send(self, event=None):  # event is passed by binders.
         msg = self.my_msg.get()
         self.my_msg.set("")  # Clears input field.
-        self.client_socket.send(bytes(msg, "utf8"))
+        self.client_socket.send(msg.encode())
         if msg == "QUIT":
             self.client_socket.close()
             self.screen.destroy()
@@ -194,11 +213,7 @@ class reg_login:
         self.screen.destroy()
 
     def connect(self):
-        self.HOST = 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
-        self.PORT = 9999
 
-        self.BUFSIZ = 1024
-        self.ADDR = (self.HOST, self.PORT)
 
         # GUI part begin
 
@@ -302,7 +317,6 @@ class reg_login:
                              fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
 
-        self.client_socket.connect(self.ADDR)
 
         receive_thread = Thread(target=self.receive)
         receive_thread.start()
