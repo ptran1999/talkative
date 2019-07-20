@@ -11,13 +11,6 @@ class userDB:
                     USERNAME TEXT,
                     PASSWORD TEXT )""")
 
-        self.mycursor.execute("""CREATE TABLE IF NOT EXISTS FRIENDS (
-                    _ID INTEGER PRIMARY KEY,
-                    USERA TEXT,
-                    USERB TEXT,
-                    STATUS INTEGER
-                     )""")
-
     # Inserts a new user into the database
     def user_insert(self, username, password):
         self.mycursor.execute("INSERT INTO USERS (USERNAME, PASSWORD) VALUES (?,?)", (username,password) )
