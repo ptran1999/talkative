@@ -30,7 +30,7 @@ class reg_login():
         Page_list = (self.Home, self.Login, self.Register, self.Chat)
 
         for frame in Page_list:
-            frame.grid(row=0,column=0,sticky="news")
+            frame.grid(row=0, column=0, sticky="news")
 
         self.top_frame(self.Home)
 
@@ -41,17 +41,17 @@ class reg_login():
 
     def Home_page(self):
         Label(self.Home, text='Talkative').pack()
-        Button(self.Home, text='Login',command=lambda:self.top_frame(self.Login)).pack()
+        Button(self.Home, text='Login', command=lambda: self.top_frame(self.Login)).pack()
         Button(self.Home, text='Register', command=lambda: self.top_frame(self.Register)).pack()
 
     def Login_page(self):
         Label(self.Login, text='Login').grid(row=0, columnspan=2)
-        Label(self.Login, text="Username: ").grid(row=1, column=0,sticky=E)
+        Label(self.Login, text="Username: ").grid(row=1, column=0, sticky=E)
         self.login_username_verify = StringVar()
         self.login_password_verify = StringVar()
         self.username_entry1 = Entry(self.Login, textvariable=self.login_username_verify)
         self.username_entry1.grid(row=1, column=1)
-        Label(self.Login, text="Password: ").grid(row=2, column=0,sticky=E)
+        Label(self.Login, text="Password: ").grid(row=2, column=0, sticky=E)
         self.password_entry1 = Entry(self.Login, textvariable=self.login_password_verify)
         self.password_entry1.grid(row=2, column=1)
         Button(self.Login, text='Sign in', command=self.send_login_info).grid(row=4, column=0)
@@ -88,7 +88,7 @@ class reg_login():
         self.msg_list.pack(side=TOP, fill=BOTH, expand=1)
         self.messages_frame.pack(side=RIGHT, fill=BOTH, expand=1)
 
-        #Button(self.Chat, text='Log out', command=lambda: self.top_frame(self.Home)).pack()
+        # Button(self.Chat, text='Log out', command=lambda: self.top_frame(self.Home)).pack()
 
         scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
         scrollbar3 = Scrollbar(self.user_frame)
@@ -154,14 +154,17 @@ class reg_login():
         self.user_frame.pack(side=LEFT, fill=BOTH, expand=1)
 
         # User input field and entry button
-        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb',
+                            bg='#484c52', fg='#c8c9cb')
         entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
         str_msg = self.my_msg.get()
+
         entry_field.bind("<Return>", self.send(str_msg))
         entry_field.pack(side=LEFT, fill=BOTH, expand=1)
 
         # Enter button
-        send_button = Button(self.messages_frame, font=myFont, text="Send", command=self.send(str_msg), bg='#484c52', fg='#c8c9cb')
+        send_button = Button(self.messages_frame, font=myFont, text="Send", command=lambda: self.send(str_msg),
+                             bg='#484c52', fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
 
     def top_frame(self, frame):
@@ -176,7 +179,7 @@ class reg_login():
         self.send(self.login_username)
         self.send(self.login_password)
 
-        result = self.client_socket.recv(self.BUFSIZ).decode()
+        result = self.client_socket.recv(self.BUFSIZ).decode("utf8")
         if result == "FAILED_LOGIN":
             self.login_fail()
         elif result == "PASS_LOGIN":
@@ -198,7 +201,8 @@ class reg_login():
         self.success_login_screen.title("Talkative")
         self.success_login_screen.geometry("300x250")
         Label(self.success_login_screen, text="Successfully login!", fg="green", font=("calibri", 11)).pack()
-        Button(self.success_login_screen, text="OK", command=lambda: self.delete_screen(self.success_login_screen)).pack()
+        Button(self.success_login_screen, text="OK",
+               command=lambda: self.delete_screen(self.success_login_screen)).pack()
 
     def send_register_info(self):
         self.send("register")
@@ -209,7 +213,7 @@ class reg_login():
         self.send(self.register_username)
         self.send(self.register_password)
 
-        result = self.client_socket.recv(self.BUFSIZ).decode()
+        result = self.client_socket.recv(self.BUFSIZ).decode("utf8")
         if result == "FAILED_TO_REGISTER":
             self.register_fail()
         elif result == "REGISTER_SUCCESS":
@@ -234,11 +238,15 @@ class reg_login():
         Button(self.success_reg_screen, text="OK", command=lambda: self.delete_screen(self.success_reg_screen)).pack()
 
     def send(self, msg, event=None):
-        msg = msg.encode()
-        self.client_socket.send(msg)
+        if msg == "Enter message...":
+            msg = self.my_msg.get()
+
+        self.client_socket.send(bytes(msg, "utf8"))
 
     def delete_screen(self, x):
         x.destroy()
+
+
 if __name__ == "__main__":
     root = Tk()
     root.title("Talkative")
