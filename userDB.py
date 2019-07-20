@@ -11,6 +11,12 @@ class userDB:
                     USERNAME TEXT,
                     PASSWORD TEXT )""")
 
+        self.mycursor.execute("""CREATE TABLE IF NOT EXISTS RELATIONSHIP (
+                            id INTEGER PRIMARY KEY,
+                            user1_ID TEXT,
+                            user2_ID TEXT,
+                            status TEXT )""")
+
     # Inserts a new user into the database
     def user_insert(self, username, password):
         self.mycursor.execute("INSERT INTO USERS (USERNAME, PASSWORD) VALUES (?,?)", (username,password) )
