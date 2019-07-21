@@ -281,7 +281,7 @@ if __name__ == "__main__":
     root = Tk()
     root.title("Talkative")
     x = int(root.winfo_screenwidth()/1.5)
-    y = int(root.winfo_screenheight()/2)
+    y = int(root.winfo_screenheight()/1.5)
     root.geometry(str(x) + 'x' + str(y))
     root.resizable(0, 0)
     reg_login(root)
