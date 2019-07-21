@@ -108,71 +108,6 @@ class reg_login():
         self.msg_list.pack(side=TOP, fill=BOTH, expand=1)
         self.messages_frame.pack(side=RIGHT, fill=BOTH, expand=1)
 
-        #Button(self.Chat, text='Log out', command=lambda: self.top_frame(self.Home)).pack()
-
-        scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
-        scrollbar3 = Scrollbar(self.user_frame)
-
-        # Connected user list
-        self.tempFriend = StringVar()
-        self.findUser_Entry = Entry(self.user_frame, textvariable=self.tempFriend)
-
-        self.friend_list = Listbox(self.user_frame, yscrollcommand=scrollbar2.set, height=10, width=25)
-        self.friend_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-
-        self.request_list = Listbox(self.user_frame, yscrollcommand=scrollbar3.set, height=10, width=25)
-        self.request_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-
-        # Accept and decline button
-        accept_b = Button(self.user_frame, text="Accept")
-        decline_b = Button(self.user_frame, text="Decline")
-
-        # Display data of request list
-        # mycursor.execute(getFriendRequestList, self.userId)
-        # temp_list = mycursor.fetchall()
-        # request_tuple = ()
-        #
-        # for i in temp_list:
-        #     request_tuple += i
-        #
-        # request_l = list(request_tuple)
-        #
-        # for i in request_l:
-        #     self.request_list.insert(END, i)
-        #
-        # # Display data of friend list
-        # mycursor.execute(getFriendList, self.userId + self.userId)
-        # temp_list = mycursor.fetchall()
-        # friend_tuple = ()
-        #
-        # for i in temp_list:
-        #     friend_tuple += i
-        #
-        # friend_l = list(friend_tuple)
-        #
-        # for i in friend_l:
-        #     self.friend_list.insert(END, i)
-        #
-        # Greetings and display user info (design later)
-        Label(self.user_frame, text="Welcome, ").pack()
-
-        # Search for other user
-        Label(self.user_frame, text="Find friend: ").pack()
-        self.findUser_Entry.pack()
-        Button(self.user_frame, text="Search").pack()
-
-        # Display user's friend list
-        scrollbar2.pack(side=RIGHT, fill=Y)
-        self.friend_list.pack(side=RIGHT, fill=BOTH, expand=1)
-
-        # Display friend request from other users
-        scrollbar3.pack(side=RIGHT, fill=Y)
-        self.request_list.pack(side=RIGHT, fill=BOTH, expand=1)
-        accept_b.pack(side=TOP)
-        decline_b.pack(side=TOP)
-
-        self.user_frame.pack(side=LEFT, fill=BOTH, expand=1)
-
         # User input field and entry button
         entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
         entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
@@ -183,6 +118,19 @@ class reg_login():
         # Enter button
         send_button = Button(self.messages_frame, font=myFont, text="Send", command=self.send(str_msg), bg='#484c52', fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
+
+        # Greetings and display user info (design later)
+        Label(self.user_frame, text="Welcome, ").pack(side=TOP, fill=X)
+        #Button(self.user_frame, text='Log out', command=lambda: self.top_frame(self.Home)).pack(side=LEFT, fill=BOTH,expand=1)
+
+        scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
+
+        # Connected user list
+        self.user_list = Listbox(self.user_frame, yscrollcommand=scrollbar2.set, height=20, width=25)
+        self.user_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
+        scrollbar2.pack(side=RIGHT, fill=Y)
+        self.user_list.pack(side=BOTTOM, fill=BOTH)
+        self.user_frame.pack(side=LEFT, fill=BOTH, expand=1)
 
     def top_frame(self, frame):
         frame.tkraise()
