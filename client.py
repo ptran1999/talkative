@@ -8,7 +8,8 @@ from userDB import userDB
 class reg_login:
 
     def __init__(self):
-        self.HOST = 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
+        #self.HOST = 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
+        self.HOST = '127.0.0.1'
         self.PORT = 9999
 
         self.BUFSIZ = 1024
@@ -55,7 +56,7 @@ class reg_login:
         # Go to register_user when done
         Button(self.screen1, text="Register", width=10, height=1, command=self.register_user).pack()
         option = "REGISTER"
-        self.client_socket.send(option.encode())
+        self.client_socket.send(bytes(option, 'utf8'))
 
     def register_user(self):
         option = "REGISTER"
@@ -64,13 +65,13 @@ class reg_login:
         username_info = self.username.get()
         password_info = self.password.get()
 
-        self.client_socket.send(username_info.encode())
-        self.client_socket.send(password_info.encode())
+        self.client_socket.send(bytes(username_info, 'utf8'))
+        self.client_socket.send(bytes(password_info, 'utf8'))
 
 
         # FAILED_TO_REGISTER will be sent if failed
         # REGISTER_SUCCESS will be sent if passed
-        result = self.client_socket.recv(self.BUFSIZ).decode()
+        result = self.client_socket.recv(self.BUFSIZ).decode('utf8')
 
         if result == "FAILED_TO_REGISTER" :
             self.register_fail()
@@ -123,7 +124,7 @@ class reg_login:
         # Go to login_verify when done
         Button(self.screen2, text="Login", width=10, height=1, command=self.login_verify).pack()
         option = "LOGIN"
-        self.client_socket.send(option.encode())
+        self.client_socket.send(bytes(option, 'utf8'))
 
     def login_verify(self):
         option = "LOGIN"
@@ -136,20 +137,20 @@ class reg_login:
         self.password_entry1.delete(0, END)
 
 
-        self.client_socket.send(self.username_info.encode())
-        self.client_socket.send(password_info.encode())
+        self.client_socket.send(bytes(self.username_info, 'utf8'))
+        self.client_socket.send(bytes(password_info, 'utf8'))
 
         # This is the result that will be received from the server
         # FAILED_LOGIN will be sent if failed
         # PASS_LOGIN will be sent if passed
-        msg = self.client_socket.recv(self.BUFSIZ).decode()
+        msg = self.client_socket.recv(self.BUFSIZ).decode('utf8')
 
 
         if msg == "PASS_LOGIN":
             self.login_success()
             self.connect()
         else:
-            self.client_socket.send(option.encode())
+            self.client_socket.send(bytes(option, 'utf8'))
             self.user_not_found()
 
     def login_success(self):
@@ -193,7 +194,7 @@ class reg_login:
     def receive(self):
         while True:
             try:
-                msg = self.client_socket.recv(self.BUFSIZ).decode()
+                msg = self.client_socket.recv(self.BUFSIZ).decode('utf8')
                 self.msg_list.insert(END, msg)
             except OSError:  # Possibly client has left the chat.
                 break
@@ -202,7 +203,8 @@ class reg_login:
     def send(self, event=None):  # event is passed by binders.
         msg = self.my_msg.get()
         self.my_msg.set("")  # Clears input field.
-        self.client_socket.send(msg.encode())
+        self.client_socket.send(bytes(msg, 'utf8'))
+
         if msg == "QUIT":
             self.client_socket.close()
             self.screen.destroy()

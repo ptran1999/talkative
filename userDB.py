@@ -43,5 +43,8 @@ class userDB:
 
     # TODO Implement all friends functions
 
+    def close_connection(self):
+        self.conn.close()
+
 
 
