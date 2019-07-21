@@ -2,8 +2,6 @@ from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
 from userDB import userDB
 
-# Holds User information on DataBase
-users = userDB()
 
 # CLIENTS holds {socket: client_name}
 # ADDRESSES holds {socket: (IP, PORT)}
@@ -40,6 +38,7 @@ def accept_connections():
 
 
             elif userOption == "LOGIN":
+                users = userDB()
                 username = client_socket.recv(BUFFERSIZE).decode('utf8')
                 password = client_socket.recv(BUFFERSIZE).decode('utf8')
                 check_user = users.user_query(username, password)
@@ -48,6 +47,7 @@ def accept_connections():
                     client_socket.send(bytes("PASS_LOGIN", 'utf8'))
                     Thread(target=handle_client, args=(client_socket,)).start()
                     print("{} logged in".format(username))
+                    users.close_connection()
                     break
                 else:
                     client_socket.send(bytes("FAILED_LOGIN", 'utf8'))
