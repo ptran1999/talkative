@@ -65,14 +65,13 @@ def register_user(client):
     while flag != True :
         username = client.recv(BUFFERSIZE).decode('utf8')
         password = client.recv(BUFFERSIZE).decode('utf8')
+
         check_user = newUser.username_query(username)
         if check_user:
             client.send(bytes("FAILED_TO_REGISTER", 'utf8'))
-            print("{} failed to register, already exists in database".format(username))
         else:
             newUser.user_insert(username, password)
             client.send(bytes("REGISTER_SUCCESS", 'utf8'))
-            print("{} registered".format(username))
             flag = True
     newUser.close_connection()
     return True
