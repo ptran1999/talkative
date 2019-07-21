@@ -7,7 +7,6 @@ from tkinter import font
 
 class reg_login():
     def __init__(self, top):
-
         self.client_socket = socket(AF_INET, SOCK_STREAM)
 
         self.HOST = '127.0.0.1'  # 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
@@ -23,62 +22,79 @@ class reg_login():
 
         self.top = top
         self.Home = Frame(self.top)
-        self.Login = Frame(self.top)
-        self.Register = Frame(self.top)
+        self.Login = Frame(self.top, background='#36393f')
+        self.Register = Frame(self.top, background='#36393f')
         self.Chat = Frame(self.top)
 
         Page_list = (self.Home, self.Login, self.Register, self.Chat)
 
         for frame in Page_list:
-            frame.grid(row=0,column=0,sticky="news")
+            frame.grid(row=0, column=0, sticky="news")
+        top.columnconfigure(0, weight=1)
+        top.rowconfigure(0, weight=1)
 
         self.top_frame(self.Home)
-
         self.Home_page()
         self.Login_page()
         self.Register_page()
         self.Chat_page()
 
+
     def Home_page(self):
-        Label(self.Home, text='Talkative').pack()
-        Button(self.Home, text='Login',command=lambda:self.top_frame(self.Login)).pack()
-        Button(self.Home, text='Register', command=lambda: self.top_frame(self.Register)).pack()
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        title = Label(self.Home, text='Talkative', font=font.Font(family='Helvetica', size=int(x / 30)), bg='#36393f', fg='#c8c9cb')
+        title.pack(fill=BOTH, expand=True)
+        login_button = Button(self.Home, text='Login',command=lambda:self.top_frame(self.Login), font=myFont, bg='#484c52', fg='#c8c9cb')
+        login_button.pack(fill=BOTH, expand=True)
+        register_button = Button(self.Home, text='Register', command=lambda: self.top_frame(self.Register), font=myFont, bg='#484c52', fg='#c8c9cb')
+        register_button.pack(fill=BOTH, expand=True)
 
     def Login_page(self):
-        Label(self.Login, text='Login').grid(row=0, columnspan=2)
-        Label(self.Login, text="Username: ").grid(row=1, column=0,sticky=E)
+        for num in range(0, 5):
+            self.Login.grid_rowconfigure(num, weight=1)
+        for num in range(0, 2):
+            self.Login.grid_columnconfigure(num, weight=1)
+
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        Label(self.Login, text='Login', font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=0, columnspan=2)
+        Label(self.Login, text="Username: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=1, column=0, sticky=E)
         self.login_username_verify = StringVar()
         self.login_password_verify = StringVar()
-        self.username_entry1 = Entry(self.Login, textvariable=self.login_username_verify)
-        self.username_entry1.grid(row=1, column=1)
-        Label(self.Login, text="Password: ").grid(row=2, column=0,sticky=E)
-        self.password_entry1 = Entry(self.Login, textvariable=self.login_password_verify, show="*")
-        self.password_entry1.grid(row=2, column=1)
-        Button(self.Login, text='Sign in', command=self.send_login_info).grid(row=4, column=0)
-        Button(self.Login, text='Cancel', command=lambda: self.top_frame(self.Home)).grid(row=4, column=1)
+        self.username_entry1 = Entry(self.Login, textvariable=self.login_username_verify, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.username_entry1.grid(row=1, column=1, sticky=W)
+        Label(self.Login, text="Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=2, column=0, sticky=E)
+        self.password_entry1 = Entry(self.Login, textvariable=self.login_password_verify, show="*", font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.password_entry1.grid(row=2, column=1, sticky=W)
+        Button(self.Login, text='Sign in', font=myFont, bg='#484c52', fg='#c8c9cb', command=self.send_login_info).grid(row=3, columnspan=2)
+        Button(self.Login, text='Cancel', font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.top_frame(self.Home)).grid(row=4, columnspan=2)
 
     def Register_page(self):
-        Label(self.Register, text='Register').grid(row=0, columnspan=2)
-        Label(self.Register, text="Username: ").grid(row=1, column=0, sticky=E)
+        for num in range(0, 6):
+            self.Register.grid_rowconfigure(num, weight=1)
+        for num in range(0, 2):
+            self.Register.grid_columnconfigure(num, weight=1)
+
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        Label(self.Register, text='Register', font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=0, columnspan=2)
+        Label(self.Register, text="Username: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=1, column=0, sticky=E)
         self.register_username_verify = StringVar()
         self.register_password_verify = StringVar()
         self.confirm = StringVar()
-        self.username_entry2 = Entry(self.Register, textvariable=self.register_username_verify)
-        self.username_entry2.grid(row=1, column=1)
-        Label(self.Register, text="Password: ").grid(row=2, column=0, sticky=E)
-        self.password_entry2 = Entry(self.Register, textvariable=self.register_password_verify, show="*")
-        self.password_entry2.grid(row=2, column=1)
-        Label(self.Register, text="Confirm Password: ").grid(row=3, column=0, sticky=E)
-        self.confirm_pass = Entry(self.Register, textvariable=self.confirm, show="*")
-        self.confirm_pass.grid(row=3, column=1)
-        Button(self.Register, text='Register', command=self.send_register_info).grid(row=4, column=0)
-        Button(self.Register, text='Cancel', command=lambda: self.top_frame(self.Home)).grid(row=4, column=1)
+        self.username_entry2 = Entry(self.Register, textvariable=self.register_username_verify, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.username_entry2.grid(row=1, column=1, sticky=W)
+        Label(self.Register, text="Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=2, column=0, sticky=E)
+        self.password_entry2 = Entry(self.Register, textvariable=self.register_password_verify, show="*", font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.password_entry2.grid(row=2, column=1, sticky=W)
+        Label(self.Register, text="Confirm Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=3, column=0, sticky=E)
+        self.confirm_pass = Entry(self.Register, textvariable=self.confirm, show="*", font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.confirm_pass.grid(row=3, column=1, sticky=W)
+        Button(self.Register, text='Register', font=myFont, bg='#484c52', fg='#c8c9cb', command=self.send_register_info).grid(row=4, columnspan=2)
+        Button(self.Register, text='Cancel', font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.top_frame(self.Home)).grid(row=5, columnspan=2)
 
     def Chat_page(self):
         self.user_frame = Frame(self.Chat)
         self.messages_frame = Frame(self.Chat)
-
-        myFont = font.Font(family='Helvetica', size=11)
+        myFont = font.Font(family='Helvetica', size=int(x / 70))
 
         self.my_msg = StringVar()
         self.my_msg.set("Enter message...")
@@ -260,8 +276,13 @@ class reg_login():
 
     def delete_screen(self, x):
         x.destroy()
+
 if __name__ == "__main__":
     root = Tk()
     root.title("Talkative")
+    x = int(root.winfo_screenwidth()/1.5)
+    y = int(root.winfo_screenheight()/2)
+    root.geometry(str(x) + 'x' + str(y))
+    root.resizable(0, 0)
     reg_login(root)
     root.mainloop()
