@@ -3,7 +3,7 @@ from tkinter import Entry
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 from tkinter import font
-import time
+from time import sleep
 
 class reg_login():
     def __init__(self, top):
@@ -225,7 +225,7 @@ class reg_login():
         Button(self.success_reg_screen, text="OK", command=lambda: self.delete_screen(self.success_reg_screen)).pack()
 
     def send(self, msg, event=None):
-        time.sleep(.01)
+        sleep(.01)
         self.client_socket.send(bytes(msg, 'utf8'))
 
     def delete_screen(self, x):
