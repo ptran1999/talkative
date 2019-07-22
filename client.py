@@ -123,14 +123,16 @@ class reg_login():
         self.messages_frame.pack(side=RIGHT, fill=BOTH, expand=1)
 
         # User input field and entry button
-        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb',
+                            bg='#484c52', fg='#c8c9cb')
         entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
         str_msg = self.my_msg.get()
         entry_field.bind("<Return>", lambda: self.send(str_msg))
         entry_field.pack(side=LEFT, fill=BOTH, expand=1)
 
         # Enter button
-        send_button = Button(self.messages_frame, font=myFont, text="Send", command= lambda: self.send(str_msg), bg='#484c52', fg='#c8c9cb')
+        send_button = Button(self.messages_frame, font=myFont, text="Send", command= lambda: self.send(str_msg),
+                             bg='#484c52', fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
 
         # Greetings and display user info (design later)
@@ -155,15 +157,20 @@ class reg_login():
 
         self.login_username = self.login_username_verify.get()
         self.login_password = self.login_password_verify.get()
-        self.send(self.login_username)
-        self.send(self.login_password)
 
-        result = self.client_socket.recv(self.BUFSIZ).decode('utf8')
-        if result == "FAILED_LOGIN":
+        if self.login_username != "" or self.login_password != "":
+            self.send(self.login_username)
+            self.send(self.login_password)
+
+            result = self.client_socket.recv(self.BUFSIZ).decode('utf8')
+            if result == "FAILED_LOGIN":
+                self.login_fail()
+            elif result == "PASS_LOGIN":
+                self.login_success()
+                self.top_frame(self.Chat)
+        else:
             self.login_fail()
-        elif result == "PASS_LOGIN":
-            self.login_success()
-            self.top_frame(self.Chat)
+
 
     def login_fail(self):
         myFont = font.Font(family='Helvetica', size=int(x / 50))
@@ -174,8 +181,10 @@ class reg_login():
         self.fail_login_screen.title("Talkative")
         self.fail_login_screen.geometry(str(int(x/2)) + 'x' + str(int(y/2)))
         self.fail_login_screen.config(background='#36393f')
-        Label(self.fail_login_screen, text="Incorrect Username/Password.", bg='#36393f', fg="red", font=myFont).pack(expand=True)
-        Button(self.fail_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.fail_login_screen)).pack(expand=True)
+        Label(self.fail_login_screen, text="Incorrect Username/Password.", bg='#36393f', fg="red",
+              font=myFont).pack(expand=True)
+        Button(self.fail_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.fail_login_screen)).pack(expand=True)
 
     def login_success(self):
         myFont = font.Font(family='Helvetica', size=int(x / 50))
@@ -184,8 +193,10 @@ class reg_login():
         self.success_login_screen.title("Talkative")
         self.success_login_screen.geometry(str(int(x/2)) + 'x' + str(int(y/2)))
         self.success_login_screen.config(background='#36393f')
-        Label(self.success_login_screen, text="Successfully logged in.", bg='#36393f', fg="green", font=myFont).pack(expand=True)
-        Button(self.success_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.success_login_screen)).pack(expand=True)
+        Label(self.success_login_screen, text="Successfully logged in.", bg='#36393f', fg="green",
+              font=myFont).pack(expand=True)
+        Button(self.success_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.success_login_screen)).pack(expand=True)
         receive_thread = Thread(target=self.receive)
         receive_thread.start()
 
@@ -195,23 +206,27 @@ class reg_login():
         self.register_password = self.register_password_verify.get()
         self.register_confirm = self.confirm.get()
 
-        if self.register_confirm == self.register_password:
-            self.send("REGISTER")
+        if self.register_username != "" or self.register_password != "" or self.register_confirm != "":
 
-            # self.client_socket.send(bytes(self.register_username, 'utf8'))
-            # self.client_socket.send(bytes(self.register_password, 'utf8'))
-            self.send(self.register_username)
-            self.send(self.register_password)
-            result = self.client_socket.recv(self.BUFSIZ).decode('utf')
+            if self.register_confirm == self.register_password:
+                self.send("REGISTER")
 
-            if result == "FAILED_TO_REGISTER":
-                self.register_fail()
-            elif result == "REGISTER_SUCCESS":
-                self.register_success()
-                self.top_frame(self.Login)
+                # self.client_socket.send(bytes(self.register_username, 'utf8'))
+                # self.client_socket.send(bytes(self.register_password, 'utf8'))
+                self.send(self.register_username)
+                self.send(self.register_password)
+                result = self.client_socket.recv(self.BUFSIZ).decode('utf')
 
+                if result == "FAILED_TO_REGISTER":
+                    self.register_fail()
+                elif result == "REGISTER_SUCCESS":
+                    self.register_success()
+                    self.top_frame(self.Login)
+
+            else:
+                self.mismatch_Pass()
         else:
-            self.mismatch_Pass()
+            self.register_fail()
 
     def register_fail(self):
         self.username_entry2.delete(0, END)
@@ -223,8 +238,10 @@ class reg_login():
         self.fail_reg_screen.title("Talkative")
         self.fail_reg_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
         self.fail_reg_screen.config(background='#36393f')
-        Label(self.fail_reg_screen, text="That username already exists.\n Try again.", bg='#36393f', fg="red", font=myFont).pack(expand=True)
-        Button(self.fail_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.fail_reg_screen)).pack(expand=True)
+        Label(self.fail_reg_screen, text="That username already exists.\n Try again.", bg='#36393f', fg="red",
+              font=myFont).pack(expand=True)
+        Button(self.fail_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.fail_reg_screen)).pack(expand=True)
 
     def mismatch_Pass(self):
         self.username_entry2.delete(0, END)
@@ -236,8 +253,10 @@ class reg_login():
         self.fail_reg_screen.title("Talkative")
         self.fail_reg_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
         self.fail_reg_screen.config(background='#36393f')
-        Label(self.fail_reg_screen, text="Passwords do not match.", bg='#36393f', fg="red", font=myFont).pack(expand=True)
-        Button(self.fail_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.fail_reg_screen)).pack(expand=True)
+        Label(self.fail_reg_screen, text="Passwords do not match.", bg='#36393f', fg="red",
+              font=myFont).pack(expand=True)
+        Button(self.fail_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.fail_reg_screen)).pack(expand=True)
 
     def register_success(self):
         myFont = font.Font(family='Helvetica', size=int(x / 50))
@@ -245,8 +264,10 @@ class reg_login():
         self.success_reg_screen.title("Talkative")
         self.success_reg_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
         self.success_reg_screen.config(background='#36393f')
-        Label(self.success_reg_screen, text="Successfully registered.", bg='#36393f', fg="green", font=myFont).pack(expand=True)
-        Button(self.success_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.success_reg_screen)).pack(expand=True)
+        Label(self.success_reg_screen, text="Successfully registered.", bg='#36393f', fg="green",
+              font=myFont).pack(expand=True)
+        Button(self.success_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.success_reg_screen)).pack(expand=True)
 
     def send(self, msg, event=None):
         check_msg = self.my_msg.get()
