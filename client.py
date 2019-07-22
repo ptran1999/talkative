@@ -106,7 +106,6 @@ class reg_login():
                command=lambda: self.top_frame(self.Home)).grid(row=5, columnspan=2)
 
     def Chat_page(self):
-        self.user_frame = Frame(self.Chat)
         self.messages_frame = Frame(self.Chat)
         myFont = font.Font(family='Helvetica', size=int(x / 70))
 
@@ -135,19 +134,6 @@ class reg_login():
                              bg='#484c52', fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
 
-        # Greetings and display user info (design later)
-        Label(self.user_frame, text="Welcome, ").pack(side=TOP, fill=X)
-        #Button(self.user_frame, text='Log out', command=lambda: self.top_frame(self.Home)).pack(side=LEFT, fill=BOTH,expand=1)
-
-        scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
-
-        # Connected user list
-        self.user_list = Listbox(self.user_frame, yscrollcommand=scrollbar2.set, height=20, width=25)
-        self.user_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-        scrollbar2.pack(side=RIGHT, fill=Y)
-        self.user_list.pack(side=BOTTOM, fill=BOTH)
-        self.user_frame.pack(side=LEFT, fill=BOTH, expand=1)
-
 
     def top_frame(self, frame):
         frame.tkraise()
@@ -158,7 +144,7 @@ class reg_login():
         self.login_username = self.login_username_verify.get()
         self.login_password = self.login_password_verify.get()
 
-        if self.login_username != "" or self.login_password != "":
+        if self.login_username != "" and self.login_password != "":
             self.send(self.login_username)
             self.send(self.login_password)
 
@@ -169,8 +155,21 @@ class reg_login():
                 self.login_success()
                 self.top_frame(self.Chat)
         else:
-            self.login_fail()
+            self.blank_entry()
 
+    def blank_entry(self):
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        self.username_entry1.delete(0, END)
+        self.password_entry1.delete(0, END)
+
+        self.fail_login_screen = Toplevel(self.top)
+        self.fail_login_screen.title("Talkative")
+        self.fail_login_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
+        self.fail_login_screen.config(background='#36393f')
+        Label(self.fail_login_screen, text="There was at least one empty line.", bg='#36393f', fg="red",
+              font=myFont).pack(expand=True)
+        Button(self.fail_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.fail_login_screen)).pack(expand=True)
 
     def login_fail(self):
         myFont = font.Font(family='Helvetica', size=int(x / 50))
@@ -206,7 +205,7 @@ class reg_login():
         self.register_password = self.register_password_verify.get()
         self.register_confirm = self.confirm.get()
 
-        if self.register_username != "" or self.register_password != "" or self.register_confirm != "":
+        if self.register_username != "" and self.register_password != "" and self.register_confirm != "":
 
             if self.register_confirm == self.register_password:
                 self.send("REGISTER")
@@ -226,7 +225,7 @@ class reg_login():
             else:
                 self.mismatch_Pass()
         else:
-            self.register_fail()
+            self.blank_entry()
 
     def register_fail(self):
         self.username_entry2.delete(0, END)
