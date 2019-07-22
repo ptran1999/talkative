@@ -5,7 +5,6 @@ from threading import Thread
 from tkinter import font
 from time import sleep
 
-
 class reg_login():
     def __init__(self, top):
         self.client_socket = socket(AF_INET, SOCK_STREAM)
@@ -17,6 +16,9 @@ class reg_login():
         self.ADDR = (self.HOST, self.PORT)
 
         self.client_socket.connect(self.ADDR)
+
+        receive_thread = Thread()
+        receive_thread.start()
 
         self.top = top
         self.Home = Frame(self.top)
@@ -36,6 +38,7 @@ class reg_login():
         self.Login_page()
         self.Register_page()
         self.Chat_page()
+
 
     def Home_page(self):
         myFont = font.Font(family='Helvetica', size=int(x / 50))
@@ -119,23 +122,19 @@ class reg_login():
         self.messages_frame.pack(side=RIGHT, fill=BOTH, expand=1)
 
         # User input field and entry button
-        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb',
-                            bg='#484c52', fg='#c8c9cb')
+        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
         entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
         str_msg = self.my_msg.get()
         entry_field.bind("<Return>", self.send(str_msg))
         entry_field.pack(side=LEFT, fill=BOTH, expand=1)
 
-        print(str_msg)
-
         # Enter button
-        send_button = Button(self.messages_frame, font=myFont, text="Send", command=lambda : self.send(str_msg), bg='#484c52',
-                             fg='#c8c9cb')
+        send_button = Button(self.messages_frame, font=myFont, text="Send", command=self.send(str_msg), bg='#484c52', fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
 
         # Greetings and display user info (design later)
         Label(self.user_frame, text="Welcome, ").pack(side=TOP, fill=X)
-        # Button(self.user_frame, text='Log out', command=lambda: self.top_frame(self.Home)).pack(side=LEFT, fill=BOTH,expand=1)
+        #Button(self.user_frame, text='Log out', command=lambda: self.top_frame(self.Home)).pack(side=LEFT, fill=BOTH,expand=1)
 
         scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
 
@@ -167,24 +166,26 @@ class reg_login():
             self.top_frame(self.Chat)
 
     def login_fail(self):
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
         self.username_entry1.delete(0, END)
         self.password_entry1.delete(0, END)
 
         self.fail_login_screen = Toplevel(self.top)
         self.fail_login_screen.title("Talkative")
-        self.fail_login_screen.geometry("300x250")
-        Label(self.fail_login_screen, text="Wrong ID or password!!!", fg="red", font=("calibri", 11)).pack()
-        Button(self.fail_login_screen, text="OK", command=lambda: self.delete_screen(self.fail_login_screen)).pack()
+        self.fail_login_screen.geometry(str(int(x/2)) + 'x' + str(int(y/2)))
+        self.fail_login_screen.config(background='#36393f')
+        Label(self.fail_login_screen, text="Incorrect Username/Password.", bg='#36393f', fg="red", font=myFont).pack(expand=True)
+        Button(self.fail_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.fail_login_screen)).pack(expand=True)
 
     def login_success(self):
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+
         self.success_login_screen = Toplevel(self.top)
         self.success_login_screen.title("Talkative")
-        self.success_login_screen.geometry("300x250")
-        Label(self.success_login_screen, text="Successfully login!", fg="green", font=("calibri", 11)).pack()
-        Button(self.success_login_screen, text="OK",
-               command=lambda: self.delete_screen(self.success_login_screen)).pack()
-        receive_thread = Thread(target=self.receive)
-        receive_thread.start()
+        self.success_login_screen.geometry(str(int(x/2)) + 'x' + str(int(y/2)))
+        self.success_login_screen.config(background='#36393f')
+        Label(self.success_login_screen, text="Successfully logged in.", bg='#36393f', fg="green", font=myFont).pack(expand=True)
+        Button(self.success_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.success_login_screen)).pack(expand=True)
 
     def send_register_info(self):
 
@@ -214,57 +215,50 @@ class reg_login():
         self.username_entry2.delete(0, END)
         self.password_entry2.delete(0, END)
         self.confirm_pass.delete(0, END)
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
 
         self.fail_reg_screen = Toplevel(self.top)
         self.fail_reg_screen.title("Talkative")
-        self.fail_reg_screen.geometry("300x250")
-        Label(self.fail_reg_screen, text="Username already existed!!", fg="red", font=("calibri", 11)).pack()
-        Button(self.fail_reg_screen, text="OK", command=lambda: self.delete_screen(self.fail_reg_screen)).pack()
+        self.fail_reg_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
+        self.fail_reg_screen.config(background='#36393f')
+        Label(self.fail_reg_screen, text="That username already exists.\n Try again.", bg='#36393f', fg="red", font=myFont).pack(expand=True)
+        Button(self.fail_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.fail_reg_screen)).pack(expand=True)
 
     def mismatch_Pass(self):
         self.username_entry2.delete(0, END)
         self.password_entry2.delete(0, END)
         self.confirm_pass.delete(0, END)
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
 
         self.fail_reg_screen = Toplevel(self.top)
         self.fail_reg_screen.title("Talkative")
-        self.fail_reg_screen.geometry("300x250")
-        Label(self.fail_reg_screen, text="The passwords do not match!!", fg="red", font=("calibri", 11)).pack()
-        Button(self.fail_reg_screen, text="OK", command=lambda: self.delete_screen(self.fail_reg_screen)).pack()
+        self.fail_reg_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
+        self.fail_reg_screen.config(background='#36393f')
+        Label(self.fail_reg_screen, text="Passwords do not match.", bg='#36393f', fg="red", font=myFont).pack(expand=True)
+        Button(self.fail_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.fail_reg_screen)).pack(expand=True)
 
     def register_success(self):
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
         self.success_reg_screen = Toplevel(self.top)
         self.success_reg_screen.title("Talkative")
-        self.success_reg_screen.geometry("300x250")
-        Label(self.success_reg_screen, text="Successfully register!", fg="green", font=("calibri", 11)).pack()
-        Button(self.success_reg_screen, text="OK", command=lambda: self.delete_screen(self.success_reg_screen)).pack()
+        self.success_reg_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
+        self.success_reg_screen.config(background='#36393f')
+        Label(self.success_reg_screen, text="Successfully registered.", bg='#36393f', fg="green", font=myFont).pack(expand=True)
+        Button(self.success_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.success_reg_screen)).pack(expand=True)
 
     def send(self, msg, event=None):
-        check_msg = self.my_msg.get()
-        if check_msg != "Enter message...":
-            msg = check_msg
         sleep(.01)
-        print(msg)
         self.client_socket.send(bytes(msg, 'utf8'))
-
-    def receive(self):
-        while True:
-            try:
-                msg = self.client_socket.recv(self.BUFSIZ).decode('utf8')
-                self.msg_list.insert(END, msg)
-            except OSError:  # Possibly client has left the chat.
-                break
 
     def delete_screen(self, x):
         x.destroy()
 
-
 if __name__ == "__main__":
     root = Tk()
     root.title("Talkative")
-    x = int(root.winfo_screenwidth() / 1.5)
-    y = int(root.winfo_screenheight() / 1.5)
+    x = int(root.winfo_screenwidth()/1.5)
+    y = int(root.winfo_screenwidth()/2.67)
     root.geometry(str(x) + 'x' + str(y))
-    # root.resizable(0, 0)
+    root.resizable(0, 0)
     reg_login(root)
     root.mainloop()
