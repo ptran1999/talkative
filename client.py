@@ -158,7 +158,7 @@ class reg_login():
         self.login_username = self.login_username_verify.get()
         self.login_password = self.login_password_verify.get()
 
-        if self.login_username != "" or self.login_password != "":
+        if self.login_username != "" and self.login_password != "":
             self.send(self.login_username)
             self.send(self.login_password)
 
@@ -219,7 +219,7 @@ class reg_login():
         self.register_password = self.register_password_verify.get()
         self.register_confirm = self.confirm.get()
 
-        if self.register_username != "" or self.register_password != "" or self.register_confirm != "":
+        if self.register_username != "" and self.register_password != "" and self.register_confirm != "":
 
             if self.register_confirm == self.register_password:
                 self.send("REGISTER")
