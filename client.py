@@ -9,8 +9,8 @@ class reg_login():
     def __init__(self, top):
         self.client_socket = socket(AF_INET, SOCK_STREAM)
 
-        # self.HOST = 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
-        self.HOST = '127.0.0.1'  # 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
+        self.HOST = 'ec2-3-14-66-181.us-east-2.compute.amazonaws.com'
+        # self.HOST = '127.0.0.1'  # 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
         self.PORT = 9999
 
         self.BUFSIZ = 1024
@@ -273,7 +273,7 @@ class reg_login():
         if check_msg != "Enter message...":
             msg = check_msg
             print(msg)
-        sleep(.01)
+        sleep(.5)
         self.client_socket.send(bytes(msg, 'utf8'))
 
     def receive(self):

@@ -2,7 +2,6 @@ from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
 from userDB import userDB
 
-
 # CLIENTS holds {socket: client_name}
 # ADDRESSES holds {socket: (IP, PORT)}
 ADDRESSES = {}
@@ -32,10 +31,7 @@ def accept_connections():
                 username = client_socket.recv(BUFFERSIZE).decode("utf8")
                 password = client_socket.recv(BUFFERSIZE).decode("utf8")
                 check_user = users.username_query(username)
-                users.mycursor.execute("SELECT * FROM USERS")
-                temp = users.mycursor.fetchall()
-                for x in temp:
-                    print(x)
+
                 if check_user:
                     client_socket.send(bytes("FAILED_TO_REGISTER", "utf8"))
                     print("{} failed to register, already exists in database".format(username))
@@ -57,7 +53,6 @@ def accept_connections():
                 else:
                     client_socket.send(bytes("FAILED_LOGIN", "utf8"))
                     print("{} does not exist in database".format(username))
-
 
 
 # Takes client socket as argument and handles a single client connection
