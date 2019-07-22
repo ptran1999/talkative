@@ -9,6 +9,7 @@ class reg_login():
     def __init__(self, top):
         self.client_socket = socket(AF_INET, SOCK_STREAM)
 
+        # self.HOST = 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
         self.HOST = '127.0.0.1'  # 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
         self.PORT = 9999
 
@@ -125,11 +126,11 @@ class reg_login():
         entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
         entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
         str_msg = self.my_msg.get()
-        entry_field.bind("<Return>", self.send(str_msg))
+        entry_field.bind("<Return>", lambda: self.send(str_msg))
         entry_field.pack(side=LEFT, fill=BOTH, expand=1)
 
         # Enter button
-        send_button = Button(self.messages_frame, font=myFont, text="Send", command=self.send(str_msg), bg='#484c52', fg='#c8c9cb')
+        send_button = Button(self.messages_frame, font=myFont, text="Send", command= lambda: self.send(str_msg), bg='#484c52', fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
 
         # Greetings and display user info (design later)
@@ -157,7 +158,6 @@ class reg_login():
         self.send(self.login_password)
 
         result = self.client_socket.recv(self.BUFSIZ).decode('utf8')
-        print(result)
         if result == "FAILED_LOGIN":
             self.login_fail()
         elif result == "PASS_LOGIN":
@@ -185,6 +185,8 @@ class reg_login():
         self.success_login_screen.config(background='#36393f')
         Label(self.success_login_screen, text="Successfully logged in.", bg='#36393f', fg="green", font=myFont).pack(expand=True)
         Button(self.success_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.success_login_screen)).pack(expand=True)
+        receive_thread = Thread(target=self.receive)
+        receive_thread.start()
 
     def send_register_info(self):
 
@@ -246,8 +248,20 @@ class reg_login():
         Button(self.success_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.delete_screen(self.success_reg_screen)).pack(expand=True)
 
     def send(self, msg, event=None):
+        check_msg = self.my_msg.get()
+        if check_msg != "Enter message...":
+            msg = check_msg
+            print(msg)
         sleep(.01)
         self.client_socket.send(bytes(msg, 'utf8'))
+
+    def receive(self):
+        while True:
+            try:
+                msg = self.client_socket.recv(self.BUFSIZ).decode('utf8')
+                self.msg_list.insert(END, msg)
+            except OSError:  # Possibly client has left the chat.
+                break
 
     def delete_screen(self, x):
         x.destroy()
@@ -258,6 +272,6 @@ if __name__ == "__main__":
     x = int(root.winfo_screenwidth()/1.5)
     y = int(root.winfo_screenwidth()/2.67)
     root.geometry(str(x) + 'x' + str(y))
-    root.resizable(0, 0)
+    # root.resizable(0, 0)
     reg_login(root)
     root.mainloop()
