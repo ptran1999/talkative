@@ -156,15 +156,20 @@ class reg_login():
 
         self.login_username = self.login_username_verify.get()
         self.login_password = self.login_password_verify.get()
-        self.send(self.login_username)
-        self.send(self.login_password)
 
-        result = self.client_socket.recv(self.BUFSIZ).decode('utf8')
-        if result == "FAILED_LOGIN":
+        if self.login_username != "" or self.login_password != "":
+            self.send(self.login_username)
+            self.send(self.login_password)
+
+            result = self.client_socket.recv(self.BUFSIZ).decode('utf8')
+            if result == "FAILED_LOGIN":
+                self.login_fail()
+            elif result == "PASS_LOGIN":
+                self.login_success()
+                self.top_frame(self.Chat)
+        else:
             self.login_fail()
-        elif result == "PASS_LOGIN":
-            self.login_success()
-            self.top_frame(self.Chat)
+
 
     def login_fail(self):
         myFont = font.Font(family='Helvetica', size=int(x / 50))
@@ -200,23 +205,27 @@ class reg_login():
         self.register_password = self.register_password_verify.get()
         self.register_confirm = self.confirm.get()
 
-        if self.register_confirm == self.register_password:
-            self.send("REGISTER")
+        if self.register_username != "" or self.register_password != "" or self.register_confirm != "":
 
-            # self.client_socket.send(bytes(self.register_username, 'utf8'))
-            # self.client_socket.send(bytes(self.register_password, 'utf8'))
-            self.send(self.register_username)
-            self.send(self.register_password)
-            result = self.client_socket.recv(self.BUFSIZ).decode('utf')
+            if self.register_confirm == self.register_password:
+                self.send("REGISTER")
 
-            if result == "FAILED_TO_REGISTER":
-                self.register_fail()
-            elif result == "REGISTER_SUCCESS":
-                self.register_success()
-                self.top_frame(self.Login)
+                # self.client_socket.send(bytes(self.register_username, 'utf8'))
+                # self.client_socket.send(bytes(self.register_password, 'utf8'))
+                self.send(self.register_username)
+                self.send(self.register_password)
+                result = self.client_socket.recv(self.BUFSIZ).decode('utf')
 
+                if result == "FAILED_TO_REGISTER":
+                    self.register_fail()
+                elif result == "REGISTER_SUCCESS":
+                    self.register_success()
+                    self.top_frame(self.Login)
+
+            else:
+                self.mismatch_Pass()
         else:
-            self.mismatch_Pass()
+            self.register_fail()
 
     def register_fail(self):
         self.username_entry2.delete(0, END)
