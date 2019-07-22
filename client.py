@@ -132,6 +132,7 @@ class reg_login():
         self.user_list.pack(side=BOTTOM, fill=BOTH)
         self.user_frame.pack(side=LEFT, fill=BOTH, expand=1)
 
+
     def top_frame(self, frame):
         frame.tkraise()
 
