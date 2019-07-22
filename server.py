@@ -83,6 +83,7 @@ def handle_client(client):
     msg = "{} has joined the chat!".format(name)
 
     try:
+        print(msg)
         client.send(bytes(welcome, 'utf8'))
         broadcast(msg)
     except:
@@ -90,7 +91,7 @@ def handle_client(client):
 
     while True:
         try:
-            msg = client.recv(BUFFERSIZE)
+            msg = client.recv(BUFFERSIZE).decode('utf8')
             if msg != "QUIT":
                 broadcast(msg, name + ": ")
             else:

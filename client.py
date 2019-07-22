@@ -5,6 +5,7 @@ from threading import Thread
 from tkinter import font
 from time import sleep
 
+
 class reg_login():
     def __init__(self, top):
         self.client_socket = socket(AF_INET, SOCK_STREAM)
@@ -16,9 +17,6 @@ class reg_login():
         self.ADDR = (self.HOST, self.PORT)
 
         self.client_socket.connect(self.ADDR)
-
-        receive_thread = Thread()
-        receive_thread.start()
 
         self.top = top
         self.Home = Frame(self.top)
@@ -39,14 +37,16 @@ class reg_login():
         self.Register_page()
         self.Chat_page()
 
-
     def Home_page(self):
         myFont = font.Font(family='Helvetica', size=int(x / 50))
-        title = Label(self.Home, text='Talkative', font=font.Font(family='Helvetica', size=int(x / 30)), bg='#36393f', fg='#c8c9cb')
+        title = Label(self.Home, text='Talkative', font=font.Font(family='Helvetica', size=int(x / 30)), bg='#36393f',
+                      fg='#c8c9cb')
         title.pack(fill=BOTH, expand=True)
-        login_button = Button(self.Home, text='Login',command=lambda:self.top_frame(self.Login), font=myFont, bg='#484c52', fg='#c8c9cb')
+        login_button = Button(self.Home, text='Login', command=lambda: self.top_frame(self.Login), font=myFont,
+                              bg='#484c52', fg='#c8c9cb')
         login_button.pack(fill=BOTH, expand=True)
-        register_button = Button(self.Home, text='Register', command=lambda: self.top_frame(self.Register), font=myFont, bg='#484c52', fg='#c8c9cb')
+        register_button = Button(self.Home, text='Register', command=lambda: self.top_frame(self.Register), font=myFont,
+                                 bg='#484c52', fg='#c8c9cb')
         register_button.pack(fill=BOTH, expand=True)
 
     def Login_page(self):
@@ -60,13 +60,17 @@ class reg_login():
         Label(self.Login, text="Username: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=1, column=0, sticky=E)
         self.login_username_verify = StringVar()
         self.login_password_verify = StringVar()
-        self.username_entry1 = Entry(self.Login, textvariable=self.login_username_verify, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.username_entry1 = Entry(self.Login, textvariable=self.login_username_verify, font=myFont,
+                                     insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
         self.username_entry1.grid(row=1, column=1, sticky=W)
         Label(self.Login, text="Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=2, column=0, sticky=E)
-        self.password_entry1 = Entry(self.Login, textvariable=self.login_password_verify, show="*", font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.password_entry1 = Entry(self.Login, textvariable=self.login_password_verify, show="*", font=myFont,
+                                     insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
         self.password_entry1.grid(row=2, column=1, sticky=W)
-        Button(self.Login, text='Sign in', font=myFont, bg='#484c52', fg='#c8c9cb', command=self.send_login_info).grid(row=3, columnspan=2)
-        Button(self.Login, text='Cancel', font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.top_frame(self.Home)).grid(row=4, columnspan=2)
+        Button(self.Login, text='Sign in', font=myFont, bg='#484c52', fg='#c8c9cb', command=self.send_login_info).grid(
+            row=3, columnspan=2)
+        Button(self.Login, text='Cancel', font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.top_frame(self.Home)).grid(row=4, columnspan=2)
 
     def Register_page(self):
         for num in range(0, 6):
@@ -80,16 +84,22 @@ class reg_login():
         self.register_username_verify = StringVar()
         self.register_password_verify = StringVar()
         self.confirm = StringVar()
-        self.username_entry2 = Entry(self.Register, textvariable=self.register_username_verify, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.username_entry2 = Entry(self.Register, textvariable=self.register_username_verify, font=myFont,
+                                     insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
         self.username_entry2.grid(row=1, column=1, sticky=W)
         Label(self.Register, text="Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=2, column=0, sticky=E)
-        self.password_entry2 = Entry(self.Register, textvariable=self.register_password_verify, show="*", font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.password_entry2 = Entry(self.Register, textvariable=self.register_password_verify, show="*", font=myFont,
+                                     insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
         self.password_entry2.grid(row=2, column=1, sticky=W)
-        Label(self.Register, text="Confirm Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=3, column=0, sticky=E)
-        self.confirm_pass = Entry(self.Register, textvariable=self.confirm, show="*", font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        Label(self.Register, text="Confirm Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=3, column=0,
+                                                                                                      sticky=E)
+        self.confirm_pass = Entry(self.Register, textvariable=self.confirm, show="*", font=myFont,
+                                  insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
         self.confirm_pass.grid(row=3, column=1, sticky=W)
-        Button(self.Register, text='Register', font=myFont, bg='#484c52', fg='#c8c9cb', command=self.send_register_info).grid(row=4, columnspan=2)
-        Button(self.Register, text='Cancel', font=myFont, bg='#484c52', fg='#c8c9cb', command=lambda: self.top_frame(self.Home)).grid(row=5, columnspan=2)
+        Button(self.Register, text='Register', font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=self.send_register_info).grid(row=4, columnspan=2)
+        Button(self.Register, text='Cancel', font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.top_frame(self.Home)).grid(row=5, columnspan=2)
 
     def Chat_page(self):
         self.user_frame = Frame(self.Chat)
@@ -109,19 +119,23 @@ class reg_login():
         self.messages_frame.pack(side=RIGHT, fill=BOTH, expand=1)
 
         # User input field and entry button
-        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb',
+                            bg='#484c52', fg='#c8c9cb')
         entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
         str_msg = self.my_msg.get()
         entry_field.bind("<Return>", self.send(str_msg))
         entry_field.pack(side=LEFT, fill=BOTH, expand=1)
 
+        print(str_msg)
+
         # Enter button
-        send_button = Button(self.messages_frame, font=myFont, text="Send", command=self.send(str_msg), bg='#484c52', fg='#c8c9cb')
+        send_button = Button(self.messages_frame, font=myFont, text="Send", command=lambda : self.send(str_msg), bg='#484c52',
+                             fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
 
         # Greetings and display user info (design later)
         Label(self.user_frame, text="Welcome, ").pack(side=TOP, fill=X)
-        #Button(self.user_frame, text='Log out', command=lambda: self.top_frame(self.Home)).pack(side=LEFT, fill=BOTH,expand=1)
+        # Button(self.user_frame, text='Log out', command=lambda: self.top_frame(self.Home)).pack(side=LEFT, fill=BOTH,expand=1)
 
         scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
 
@@ -166,7 +180,10 @@ class reg_login():
         self.success_login_screen.title("Talkative")
         self.success_login_screen.geometry("300x250")
         Label(self.success_login_screen, text="Successfully login!", fg="green", font=("calibri", 11)).pack()
-        Button(self.success_login_screen, text="OK", command=lambda: self.delete_screen(self.success_login_screen)).pack()
+        Button(self.success_login_screen, text="OK",
+               command=lambda: self.delete_screen(self.success_login_screen)).pack()
+        receive_thread = Thread(target=self.receive)
+        receive_thread.start()
 
     def send_register_info(self):
 
@@ -176,9 +193,6 @@ class reg_login():
 
         if self.register_confirm == self.register_password:
             self.send("REGISTER")
-
-            print(self.register_username)
-            print(self.register_password)
 
             # self.client_socket.send(bytes(self.register_username, 'utf8'))
             # self.client_socket.send(bytes(self.register_password, 'utf8'))
@@ -225,18 +239,31 @@ class reg_login():
         Button(self.success_reg_screen, text="OK", command=lambda: self.delete_screen(self.success_reg_screen)).pack()
 
     def send(self, msg, event=None):
+        check_msg = self.my_msg.get()
+        if check_msg != "Enter message...":
+            msg = check_msg
         sleep(.01)
+        print(msg)
         self.client_socket.send(bytes(msg, 'utf8'))
+
+    def receive(self):
+        while True:
+            try:
+                msg = self.client_socket.recv(self.BUFSIZ).decode('utf8')
+                self.msg_list.insert(END, msg)
+            except OSError:  # Possibly client has left the chat.
+                break
 
     def delete_screen(self, x):
         x.destroy()
 
+
 if __name__ == "__main__":
     root = Tk()
     root.title("Talkative")
-    x = int(root.winfo_screenwidth()/1.5)
-    y = int(root.winfo_screenheight()/1.5)
+    x = int(root.winfo_screenwidth() / 1.5)
+    y = int(root.winfo_screenheight() / 1.5)
     root.geometry(str(x) + 'x' + str(y))
-    root.resizable(0, 0)
+    # root.resizable(0, 0)
     reg_login(root)
     root.mainloop()
