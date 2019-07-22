@@ -169,8 +169,21 @@ class reg_login():
                 self.login_success()
                 self.top_frame(self.Chat)
         else:
-            self.login_fail()
+            self.blank_entry()
 
+    def blank_entry(self):
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        self.username_entry1.delete(0, END)
+        self.password_entry1.delete(0, END)
+
+        self.fail_login_screen = Toplevel(self.top)
+        self.fail_login_screen.title("Talkative")
+        self.fail_login_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
+        self.fail_login_screen.config(background='#36393f')
+        Label(self.fail_login_screen, text="There was at least one empty line.", bg='#36393f', fg="red",
+              font=myFont).pack(expand=True)
+        Button(self.fail_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.fail_login_screen)).pack(expand=True)
 
     def login_fail(self):
         myFont = font.Font(family='Helvetica', size=int(x / 50))
@@ -226,7 +239,7 @@ class reg_login():
             else:
                 self.mismatch_Pass()
         else:
-            self.register_fail()
+            self.blank_entry()
 
     def register_fail(self):
         self.username_entry2.delete(0, END)
