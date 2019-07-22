@@ -106,7 +106,6 @@ class reg_login():
                command=lambda: self.top_frame(self.Home)).grid(row=5, columnspan=2)
 
     def Chat_page(self):
-        self.user_frame = Frame(self.Chat)
         self.messages_frame = Frame(self.Chat)
         myFont = font.Font(family='Helvetica', size=int(x / 70))
 
@@ -134,19 +133,6 @@ class reg_login():
         send_button = Button(self.messages_frame, font=myFont, text="Send", command= lambda: self.send(str_msg),
                              bg='#484c52', fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
-
-        # Greetings and display user info (design later)
-        Label(self.user_frame, text="Welcome, ").pack(side=TOP, fill=X)
-        #Button(self.user_frame, text='Log out', command=lambda: self.top_frame(self.Home)).pack(side=LEFT, fill=BOTH,expand=1)
-
-        scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
-
-        # Connected user list
-        self.user_list = Listbox(self.user_frame, yscrollcommand=scrollbar2.set, height=20, width=25)
-        self.user_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-        scrollbar2.pack(side=RIGHT, fill=Y)
-        self.user_list.pack(side=BOTTOM, fill=BOTH)
-        self.user_frame.pack(side=LEFT, fill=BOTH, expand=1)
 
 
     def top_frame(self, frame):
