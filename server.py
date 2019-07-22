@@ -1,6 +1,7 @@
 from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
 from userDB import userDB
+from time import sleep
 
 # CLIENTS holds {socket: client_name}
 # ADDRESSES holds {socket: (IP, PORT)}
@@ -21,7 +22,7 @@ SERVER.bind(ADDR)
 def accept_connections():
     while 1:
         client_socket, client_address = SERVER.accept()
-        print("{}:{} has connected.".format(client_address[0], client_address[1]))
+        print("{}:{} connected.".format(client_address[0], client_address[1]))
         ADDRESSES[client_socket] = client_address
         users = userDB()
         while 1:
@@ -34,11 +35,11 @@ def accept_connections():
 
                 if check_user:
                     client_socket.send(bytes("FAILED_TO_REGISTER", "utf8"))
-                    print("{} failed to register, already exists in database".format(username))
+                    print("{} failed to register, user already exists.".format(username))
                 else:
                     users.user_insert(username, password)
                     client_socket.send(bytes("REGISTER_SUCCESS", "utf8"))
-                    print("{} registered".format(username))
+                    print("{} registered.".format(username))
 
             elif option == "LOGIN":
                 username = client_socket.recv(BUFFERSIZE).decode("utf8")
@@ -48,22 +49,21 @@ def accept_connections():
                     ONLINE_USERS[client_socket] = username
                     client_socket.send(bytes("PASS_LOGIN", "utf8"))
                     Thread(target=handle_client, args=(client_socket,)).start()
-                    print("{} logged in".format(username))
                     break
                 else:
                     client_socket.send(bytes("FAILED_LOGIN", "utf8"))
-                    print("{} does not exist in database".format(username))
+                    print("{} does not exist.".format(username))
 
 
 # Takes client socket as argument and handles a single client connection
 def handle_client(client):
     name = ONLINE_USERS[client]
-    welcome = "Welcome {}! Type QUIT to exit.".format(name)
-    msg = "{} has joined the chat!".format(name)
+    welcome = "Welcome, {}! Type QUIT to exit.".format(name)
+    msg = "{} connected.".format(name)
 
     try:
-        print(msg)
         client.send(bytes(welcome, 'utf8'))
+        sleep(.5)
         broadcast(msg)
     except:
         pass
@@ -83,7 +83,8 @@ def handle_client(client):
 
 def close_connection(client):
     client.send(bytes("QUIT", 'utf8'))
-    print("{}:{} has disconnected.".format(ADDRESSES[client][0], ADDRESSES[client][1]))
+    print("{}:{} disconnected.".format(ADDRESSES[client][0], ADDRESSES[client][1]))
+    broadcast("{} disconnected.".format(ONLINE_USERS[client]))
     client.close()
     del ADDRESSES[client]
     del ONLINE_USERS[client]

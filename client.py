@@ -4,6 +4,7 @@ from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 from tkinter import font
 from time import sleep
+import os
 
 class reg_login():
     def __init__(self, top):
@@ -17,7 +18,6 @@ class reg_login():
         self.ADDR = (self.HOST, self.PORT)
 
         self.client_socket.connect(self.ADDR)
-
         receive_thread = Thread()
         receive_thread.start()
 
@@ -39,7 +39,6 @@ class reg_login():
         self.Login_page()
         self.Register_page()
         self.Chat_page()
-
 
     def Home_page(self):
         myFont = font.Font(family='Helvetica', size=int(x / 50))
@@ -125,15 +124,16 @@ class reg_login():
         entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb',
                             bg='#484c52', fg='#c8c9cb')
         entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
-        str_msg = self.my_msg.get()
-        entry_field.bind("<Return>", lambda: self.send(str_msg))
+        if self.my_msg.get() != "Enter message...":
+            str_msg = self.my_msg.get()
+        else:
+            str_msg = ""
+        entry_field.bind("<Return>", lambda send: (self.send(str_msg), sleep(.1), entry_field.delete('0', 'end')))
         entry_field.pack(side=LEFT, fill=BOTH, expand=1)
-
         # Enter button
-        send_button = Button(self.messages_frame, font=myFont, text="Send", command= lambda: self.send(str_msg),
+        send_button = Button(self.messages_frame, font=myFont, text="Send", command=lambda: self.send(str_msg),
                              bg='#484c52', fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
-
 
     def top_frame(self, frame):
         frame.tkraise()
@@ -186,16 +186,6 @@ class reg_login():
                command=lambda: self.delete_screen(self.fail_login_screen)).pack(expand=True)
 
     def login_success(self):
-        myFont = font.Font(family='Helvetica', size=int(x / 50))
-
-        self.success_login_screen = Toplevel(self.top)
-        self.success_login_screen.title("Talkative")
-        self.success_login_screen.geometry(str(int(x/2)) + 'x' + str(int(y/2)))
-        self.success_login_screen.config(background='#36393f')
-        Label(self.success_login_screen, text="Successfully logged in.", bg='#36393f', fg="green",
-              font=myFont).pack(expand=True)
-        Button(self.success_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
-               command=lambda: self.delete_screen(self.success_login_screen)).pack(expand=True)
         receive_thread = Thread(target=self.receive)
         receive_thread.start()
 
@@ -275,6 +265,8 @@ class reg_login():
             print(msg)
         sleep(.5)
         self.client_socket.send(bytes(msg, 'utf8'))
+        if msg == "QUIT":
+            os._exit(0)
 
     def receive(self):
         while True:
@@ -286,6 +278,7 @@ class reg_login():
 
     def delete_screen(self, x):
         x.destroy()
+
 
 if __name__ == "__main__":
     root = Tk()
