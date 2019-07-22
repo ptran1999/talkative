@@ -20,6 +20,7 @@ SERVER.bind(ADDR)
 
 # Sets up handling for incoming clients
 def accept_connections():
+
     while True:
         client_socket, client_address = SERVER.accept()
         print("{}:{} has connected.".format(client_address[0], client_address[1]))
