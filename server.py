@@ -60,20 +60,24 @@ def accept_connections():
 
 # Create a seperate thread to register the user
 def register_user(client):
+    print("Starting registering user")
     flag = False
     newUser = userDB()
     while flag != True :
+
         username = client.recv(BUFFERSIZE).decode('utf8')
         password = client.recv(BUFFERSIZE).decode('utf8')
 
         check_user = newUser.username_query(username)
         if check_user:
             client.send(bytes("FAILED_TO_REGISTER", 'utf8'))
+
         else:
             newUser.user_insert(username, password)
             client.send(bytes("REGISTER_SUCCESS", 'utf8'))
             flag = True
     newUser.close_connection()
+    print("closing connection")
     return True
 
 # Takes client socket as argument and handles a single client connection
