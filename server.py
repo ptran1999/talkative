@@ -20,66 +20,45 @@ SERVER.bind(ADDR)
 
 # Sets up handling for incoming clients
 def accept_connections():
-
-    while True:
+    while 1:
         client_socket, client_address = SERVER.accept()
         print("{}:{} has connected.".format(client_address[0], client_address[1]))
         ADDRESSES[client_socket] = client_address
+        users = userDB()
+        while 1:
+            option = client_socket.recv(BUFFERSIZE)
+            option = option.decode("utf8")
+            if option == "REGISTER":
+                username = client_socket.recv(BUFFERSIZE).decode("utf8")
+                password = client_socket.recv(BUFFERSIZE).decode("utf8")
+                check_user = users.username_query(username)
+                users.mycursor.execute("SELECT * FROM USERS")
+                temp = users.mycursor.fetchall()
+                for x in temp:
+                    print(x)
+                if check_user:
+                    client_socket.send(bytes("FAILED_TO_REGISTER", "utf8"))
+                    print("{} failed to register, already exists in database".format(username))
+                else:
+                    users.user_insert(username, password)
+                    client_socket.send(bytes("REGISTER_SUCCESS", "utf8"))
+                    print("{} registered".format(username))
 
-        # When a client connects, clicking register or login will send to the server a string of either
-        # REGISTER or LOGIN
-
-        while True:
-            userOption = client_socket.recv(BUFFERSIZE).decode('utf8')
-            print("User option is {}".format(userOption))
-            if userOption == "REGISTER":
-                register_thread = Thread(target=register_user, args=(client_socket,))
-                register_thread.start()
-                register_thread.join()
-
-
-            elif userOption == "LOGIN":
-                users = userDB()
-                username = client_socket.recv(BUFFERSIZE).decode('utf8')
-                password = client_socket.recv(BUFFERSIZE).decode('utf8')
+            elif option == "LOGIN":
+                username = client_socket.recv(BUFFERSIZE).decode("utf8")
+                password = client_socket.recv(BUFFERSIZE).decode("utf8")
                 check_user = users.user_query(username, password)
                 if check_user:
                     ONLINE_USERS[client_socket] = username
-                    client_socket.send(bytes("PASS_LOGIN", 'utf8'))
+                    client_socket.send(bytes("PASS_LOGIN", "utf8"))
                     Thread(target=handle_client, args=(client_socket,)).start()
                     print("{} logged in".format(username))
-                    users.close_connection()
                     break
                 else:
-                    client_socket.send(bytes("FAILED_LOGIN", 'utf8'))
+                    client_socket.send(bytes("FAILED_LOGIN", "utf8"))
                     print("{} does not exist in database".format(username))
 
-            else:
-                pass
 
-
-
-# Create a seperate thread to register the user
-def register_user(client):
-    print("Starting registering user")
-    flag = False
-    newUser = userDB()
-    while flag != True :
-
-        username = client.recv(BUFFERSIZE).decode('utf8')
-        password = client.recv(BUFFERSIZE).decode('utf8')
-
-        check_user = newUser.username_query(username)
-        if check_user:
-            client.send(bytes("FAILED_TO_REGISTER", 'utf8'))
-
-        else:
-            newUser.user_insert(username, password)
-            client.send(bytes("REGISTER_SUCCESS", 'utf8'))
-            flag = True
-    newUser.close_connection()
-    print("closing connection")
-    return True
 
 # Takes client socket as argument and handles a single client connection
 def handle_client(client):
