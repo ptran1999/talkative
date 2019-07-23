@@ -1,61 +1,110 @@
-from socket import AF_INET, socket, SOCK_STREAM
+from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
+from userDB import userDB
+from time import sleep
 
-clients = {}
-addresses = {}
+# CLIENTS holds {socket: client_name}
+# ADDRESSES holds {socket: (IP, PORT)}
+ADDRESSES = {}
+ONLINE_USERS = {}
 
 HOST = ''
 PORT = 9999
-BUFSIZ = 1024
+BUFFERSIZE = 1024
 ADDR = (HOST, PORT)
 
+# Creating the server socket and binds it to ADDR
 SERVER = socket(AF_INET, SOCK_STREAM)
 SERVER.bind(ADDR)
 
 
-# Sets up handling for incoming clients.
-def accept_incoming_connections():
-    while True:
-        client, address = SERVER.accept()
-        print("%s:%s has connected." % address)
-        client.send(bytes("Welcome to Talkative! \nEnter your name: ", "utf8"))
-        addresses[client] = address
-        Thread(target=handle_client, args=(client,)).start()
+# Sets up handling for incoming clients
+def accept_connections():
+    while 1:
+        client_socket, client_address = SERVER.accept()
+        print("{}:{} connected.".format(client_address[0], client_address[1]))
+        ADDRESSES[client_socket] = client_address
+        users = userDB()
+        while 1:
+            option = client_socket.recv(BUFFERSIZE)
+            option = option.decode("utf8")
+            if option == "REGISTER":
+                username = client_socket.recv(BUFFERSIZE).decode("utf8")
+                password = client_socket.recv(BUFFERSIZE).decode("utf8")
+                check_user = users.username_query(username)
+
+                if check_user:
+                    client_socket.send(bytes("FAILED_TO_REGISTER", "utf8"))
+                    print("{} failed to register, user already exists.".format(username))
+                else:
+                    users.user_insert(username, password)
+                    client_socket.send(bytes("REGISTER_SUCCESS", "utf8"))
+                    print("{} registered.".format(username))
+
+            elif option == "LOGIN":
+                username = client_socket.recv(BUFFERSIZE).decode("utf8")
+                password = client_socket.recv(BUFFERSIZE).decode("utf8")
+                check_user = users.user_query(username, password)
+                if check_user:
+                    ONLINE_USERS[client_socket] = username
+                    client_socket.send(bytes("PASS_LOGIN", "utf8"))
+                    Thread(target=handle_client, args=(client_socket,)).start()
+                    break
+                else:
+                    client_socket.send(bytes("FAILED_LOGIN", "utf8"))
+                    print("{} does not exist.".format(username))
 
 
-# Takes client socket as argument.
-# Handles a single client connection.
+# Takes client socket as argument and handles a single client connection
 def handle_client(client):
-    name = client.recv(BUFSIZ).decode("utf8")
-    welcome = 'Welcome %s! Type QUIT to exit.' % name
-    client.send(bytes(welcome, "utf8"))
-    msg = "%s has joined the chat!" % name
-    broadcast(bytes(msg, "utf8"))
-    clients[client] = name
+    name = ONLINE_USERS[client]
+    welcome = "Welcome, {}! Type QUIT to exit.".format(name)
+    msg = "{} connected.".format(name)
+
+    try:
+        client.send(bytes(welcome, 'utf8'))
+        sleep(.5)
+        broadcast(msg)
+    except:
+        pass
 
     while True:
-        msg = client.recv(BUFSIZ)
-        if msg != bytes("QUIT", "utf8"):
-            broadcast(msg, name + ": ")
-        else:
-            client.send(bytes("QUIT", "utf8"))
-            client.close()
-            del clients[client]
-            broadcast(bytes("%s has left the chat." % name, "utf8"))
-            break
+        try:
+            msg = client.recv(BUFFERSIZE).decode('utf8')
+            if msg != "QUIT":
+                broadcast(msg, name + ": ")
+            else:
+                close_connection(client)
+                break
+
+        except:
+            continue
 
 
-# prefix is for name identification.
-# Broadcasts a message to all the clients.
+def close_connection(client):
+    client.send(bytes("QUIT", 'utf8'))
+    print("{}:{} disconnected.".format(ADDRESSES[client][0], ADDRESSES[client][1]))
+    broadcast("{} disconnected.".format(ONLINE_USERS[client]))
+    client.close()
+    del ADDRESSES[client]
+    del ONLINE_USERS[client]
+
+
+# Prefix is for name identification
+# Broadcasts a message to all clients
+# TODO change to broadcast to single client
 def broadcast(msg, prefix=""):
-    for sock in clients:
-        sock.send(bytes(prefix, "utf8") + msg)
+    sent_message = "{}{}".format(prefix, msg)
+    print(sent_message)
+    try:
+        for client in ONLINE_USERS:
+            client.send(bytes(sent_message, 'utf8'))
+    except:
+        pass
 
 
 if __name__ == "__main__":
-    SERVER.listen(5)
+    SERVER.listen(10)
     print("Waiting for connection...")
-    ACCEPT_THREAD = Thread(target=accept_incoming_connections)
-    ACCEPT_THREAD.start()
-    ACCEPT_THREAD.join()
+    accept_connections()
     SERVER.close()

@@ -1,215 +1,113 @@
 from tkinter import *
 from tkinter import Entry
-from mydatabase import *
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 from tkinter import font
+from time import sleep
+import os
 
-
-class reg_login:
-
-    def __init__(self):
-        self.screen = Tk()
+class reg_login():
+    def __init__(self, top):
         self.client_socket = socket(AF_INET, SOCK_STREAM)
 
-    def main_screen(self):
-        self.screen.geometry("300x250")
-        self.screen.title("Talkative")
-        Label(text="Talkative", bg="grey", width="300", height="2", font=("Calibri", 15)).pack()
-        Label(text="").pack()
-        Button(text="Login", height="2", width="30", command=self.login).pack()
-        Label(text="").pack()
-        Button(text="Register", height="2", width="30", command=self.register).pack()
-
-        self.screen.protocol("WM_DELETE_WINDOW", self.on_closing)
-        self.screen.mainloop()
-
-    # Register part
-    def register(self):
-        self.screen1 = Toplevel(self.screen)
-        self.screen1.title("Talkative")
-        self.screen1.geometry("300x250")
-
-        self.username = StringVar()
-        self.password = StringVar()
-
-        Label(self.screen1, text="Register").pack()
-        Label(self.screen1, text="").pack()
-
-        # Send info to <***>_entry variables for later use
-        Label(self.screen1, text="Username * ").pack()
-        self.username_entry = Entry(self.screen1, textvariable=self.username)
-        self.username_entry.pack()
-        Label(self.screen1, text="Password * ").pack()
-        self.password_entry = Entry(self.screen1, textvariable=self.password)
-        self.password_entry.pack()
-        Label(self.screen1, text="").pack()
-
-        # Go to register_user when done
-        Button(self.screen1, text="Register", width=10, height=1, command=self.register_user).pack()
-
-    def register_user(self):
-        # get the info from register and put it to a temp_user
-        username_info = self.username.get()
-        password_info = self.password.get()
-
-        self.temp_user1 = (username_info, password_info)
-        temp_name = (username_info,)
-
-        # Query if username already exist in the db
-        mycursor.execute(usernameQuery, temp_name)
-        msg = mycursor.fetchone()
-
-        if msg:
-            self.register_fail()
-        else:
-            self.register_success()
-
-    def register_success(self):
-        # insert temp_user to db
-        mycursor.execute(userInsert, self.temp_user1)
-        db.commit()
-
-        self.screen5 = Toplevel(self.screen)
-        self.screen5.title("Talkative")
-        self.screen5.geometry("300x250")
-        Label(self.screen5, text="Successfully register!", fg="green", font=("calibri", 11)).pack()
-        Button(self.screen5, text="OK", command=self.delete1_5).pack()
-
-    def register_fail(self):
-        # refresh the input for next incoming info
-        self.username_entry.delete(0, END)
-        self.password_entry.delete(0, END)
-
-        self.screen6 = Toplevel(self.screen)
-        self.screen6.title("Talkative")
-        self.screen6.geometry("300x250")
-        Label(self.screen6, text="Username already existed!!", fg="red", font=("calibri", 11)).pack()
-        Button(self.screen6, text="OK", command=self.delete6).pack()
-
-    # Login part
-    # Everything is the same concept with register
-    def login(self):
-        self.screen2 = Toplevel(self.screen)
-        self.screen2.title("Talkative")
-        self.screen2.geometry("300x250")
-        Label(self.screen2, text="Login").pack()
-        Label(self.screen2, text="").pack()
-
-        # use different variables to avoid confusion
-
-        self.username_verify = StringVar()
-        self.password_verify = StringVar()
-
-        Label(self.screen2, text="Username * ").pack()
-        self.username_entry1 = Entry(self.screen2, textvariable=self.username_verify)
-        self.username_entry1.pack()
-        Label(self.screen2, text="").pack()
-        Label(self.screen2, text="Password * ").pack()
-        self.password_entry1 = Entry(self.screen2, textvariable=self.password_verify)
-        self.password_entry1.pack()
-        Label(self.screen2, text="").pack()
-
-        # Go to login_verify when done
-        Button(self.screen2, text="Login", width=10, height=1, command=self.login_verify).pack()
-
-    def login_verify(self):
-        self.username_info = self.username_verify.get()
-        password_info = self.password_verify.get()
-
-        temp_user = (self.username_info, password_info)
-        self.temp_username = (self.username_info,)
-        self.username_entry1.delete(0, END)
-        self.password_entry1.delete(0, END)
-
-        # Query if user exist in the db
-        mycursor.execute(userQuery, temp_user)
-        msg = mycursor.fetchone()
-
-        if msg:
-            self.login_success()
-            self.connect()
-        else:
-            self.user_not_found()
-
-    def login_success(self):
-        self.screen3 = Toplevel(self.screen)
-        self.screen3.title("Talkative")
-        self.screen3.geometry("300x250")
-        Label(self.screen3, text="Successfully login!", fg="green", font=("calibri", 11)).pack()
-        Button(self.screen3, text="OK", command=self.delete0_2_3).pack()
-
-        mycursor.execute(getUserId, self.temp_username)
-        self.userId = mycursor.fetchone()
-
-    def user_not_found(self):
-        self.screen4 = Toplevel(self.screen)
-        self.screen4.title("Talkative")
-        self.screen4.geometry("300x250")
-        Label(self.screen4, text="User Not Found", fg="red", font=("calibri", 11)).pack()
-        Button(self.screen4, text="OK", command=self.delete4).pack()
-
-    def delete1_5(self):
-        self.screen1.destroy()
-        self.screen5.destroy()
-
-    def delete0_2_3(self):
-        self.screen2.destroy()
-        self.screen3.destroy()
-
-    def delete3(self):
-        self.screen3.destroy()
-
-    def delete4(self):
-        self.screen4.destroy()
-
-    def delete6(self):
-        self.screen6.destroy()
-
-    # Handles receiving of messages
-    def receive(self):
-        while True:
-            try:
-                msg = self.client_socket.recv(self.BUFSIZ).decode("utf8")
-                self.msg_list.insert(END, msg)
-            except OSError:  # Possibly client has left the chat.
-                break
-
-    # Handles sending of messages
-    def send(self, event=None):  # event is passed by binders.
-        msg = self.my_msg.get()
-        self.my_msg.set("")  # Clears input field.
-        self.client_socket.send(bytes(msg, "utf8"))
-        if msg == "QUIT":
-            self.client_socket.close()
-            self.screen.destroy()
-
-    # This function is to be called when the window is closed
-    def on_closing(self, event=None):
-        self.client_socket.close()
-        self.screen.destroy()
-
-    def connect(self):
-        self.HOST = '127.0.0.1'
+        self.HOST = 'ec2-3-14-66-181.us-east-2.compute.amazonaws.com'
+        # self.HOST = '127.0.0.1'  # 'ec2-18-217-233-159.us-east-2.compute.amazonaws.com'
         self.PORT = 9999
 
         self.BUFSIZ = 1024
         self.ADDR = (self.HOST, self.PORT)
 
-        # GUI part begin
+        self.client_socket.connect(self.ADDR)
+        receive_thread = Thread()
+        receive_thread.start()
 
-        self.client_gui = Toplevel(self.screen)
-        self.client_gui.title("Talkative")
+        self.top = top
+        self.Home = Frame(self.top)
+        self.Login = Frame(self.top, background='#36393f')
+        self.Register = Frame(self.top, background='#36393f')
+        self.Chat = Frame(self.top)
 
-        # Frame declarations
-        self.talkative_frame = Frame(self.client_gui)
-        self.user_frame = Frame(self.talkative_frame)
-        self.messages_frame = Frame(self.talkative_frame)
+        Page_list = (self.Home, self.Login, self.Register, self.Chat)
 
-        self.talkative_frame.pack(fill=BOTH, expand=1)
-        myFont = font.Font(family='Helvetica', size=11)
+        for frame in Page_list:
+            frame.grid(row=0, column=0, sticky="news")
+        top.columnconfigure(0, weight=1)
+        top.rowconfigure(0, weight=1)
 
-        # For the messages to be sent.
+        self.top_frame(self.Home)
+        self.Home_page()
+        self.Login_page()
+        self.Register_page()
+        self.Chat_page()
+
+    def Home_page(self):
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        title = Label(self.Home, text='Talkative', font=font.Font(family='Helvetica', size=int(x / 30)), bg='#36393f',
+                      fg='#c8c9cb')
+        title.pack(fill=BOTH, expand=True)
+        login_button = Button(self.Home, text='Login', command=lambda: self.top_frame(self.Login), font=myFont,
+                              bg='#484c52', fg='#c8c9cb')
+        login_button.pack(fill=BOTH, expand=True)
+        register_button = Button(self.Home, text='Register', command=lambda: self.top_frame(self.Register), font=myFont,
+                                 bg='#484c52', fg='#c8c9cb')
+        register_button.pack(fill=BOTH, expand=True)
+
+    def Login_page(self):
+        for num in range(0, 5):
+            self.Login.grid_rowconfigure(num, weight=1)
+        for num in range(0, 2):
+            self.Login.grid_columnconfigure(num, weight=1)
+
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        Label(self.Login, text='Login', font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=0, columnspan=2)
+        Label(self.Login, text="Username: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=1, column=0, sticky=E)
+        self.login_username_verify = StringVar()
+        self.login_password_verify = StringVar()
+        self.username_entry1 = Entry(self.Login, textvariable=self.login_username_verify, font=myFont,
+                                     insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.username_entry1.grid(row=1, column=1, sticky=W)
+        Label(self.Login, text="Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=2, column=0, sticky=E)
+        self.password_entry1 = Entry(self.Login, textvariable=self.login_password_verify, show="*", font=myFont,
+                                     insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.password_entry1.grid(row=2, column=1, sticky=W)
+        Button(self.Login, text='Sign in', font=myFont, bg='#484c52', fg='#c8c9cb', command=self.send_login_info).grid(
+            row=3, columnspan=2)
+        Button(self.Login, text='Cancel', font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.top_frame(self.Home)).grid(row=4, columnspan=2)
+
+    def Register_page(self):
+        for num in range(0, 6):
+            self.Register.grid_rowconfigure(num, weight=1)
+        for num in range(0, 2):
+            self.Register.grid_columnconfigure(num, weight=1)
+
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        Label(self.Register, text='Register', font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=0, columnspan=2)
+        Label(self.Register, text="Username: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=1, column=0, sticky=E)
+        self.register_username_verify = StringVar()
+        self.register_password_verify = StringVar()
+        self.confirm = StringVar()
+        self.username_entry2 = Entry(self.Register, textvariable=self.register_username_verify, font=myFont,
+                                     insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.username_entry2.grid(row=1, column=1, sticky=W)
+        Label(self.Register, text="Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=2, column=0, sticky=E)
+        self.password_entry2 = Entry(self.Register, textvariable=self.register_password_verify, show="*", font=myFont,
+                                     insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.password_entry2.grid(row=2, column=1, sticky=W)
+        Label(self.Register, text="Confirm Password: ", font=myFont, bg='#36393f', fg='#c8c9cb').grid(row=3, column=0,
+                                                                                                      sticky=E)
+        self.confirm_pass = Entry(self.Register, textvariable=self.confirm, show="*", font=myFont,
+                                  insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        self.confirm_pass.grid(row=3, column=1, sticky=W)
+        Button(self.Register, text='Register', font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=self.send_register_info).grid(row=4, columnspan=2)
+        Button(self.Register, text='Cancel', font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.top_frame(self.Home)).grid(row=5, columnspan=2)
+
+    def Chat_page(self):
+        self.messages_frame = Frame(self.Chat)
+        myFont = font.Font(family='Helvetica', size=int(x / 70))
+
         self.my_msg = StringVar()
         self.my_msg.set("Enter message...")
 
@@ -222,160 +120,172 @@ class reg_login:
         self.msg_list.pack(side=TOP, fill=BOTH, expand=1)
         self.messages_frame.pack(side=RIGHT, fill=BOTH, expand=1)
 
-        scrollbar2 = Scrollbar(self.user_frame)  # To navigate through currently connected users.
-        scrollbar3 = Scrollbar(self.user_frame)
-
-        # Connected user list
-        self.tempFriend = StringVar()
-        self.findUser_Entry = Entry(self.user_frame, textvariable=self.tempFriend)
-
-        self.friend_list = Listbox(self.user_frame, yscrollcommand=scrollbar2.set, height=10, width=25)
-        self.friend_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-
-        self.request_list = Listbox(self.user_frame, yscrollcommand=scrollbar3.set, height=10, width=25)
-        self.request_list.config(font=myFont, bg='#36393f', fg='#c8c9cb')
-
-        # Accept and decline button
-        accept_b = Button(self.user_frame, text="Accept", command=self.accept_request)
-        decline_b = Button(self.user_frame, text="Decline", command=self.decline_request)
-
-        # Display data of request list
-        mycursor.execute(getFriendRequestList, self.userId)
-        temp_list = mycursor.fetchall()
-        request_tuple = ()
-
-        for i in temp_list:
-            request_tuple += i
-
-        request_l = list(request_tuple)
-
-        for i in request_l:
-            self.request_list.insert(END, i)
-
-        # Display data of friend list
-        mycursor.execute(getFriendList, self.userId + self.userId)
-        temp_list = mycursor.fetchall()
-        friend_tuple = ()
-
-        for i in temp_list:
-            friend_tuple += i
-
-        friend_l = list(friend_tuple)
-
-        for i in friend_l:
-            self.friend_list.insert(END, i)
-
-        # Greetings and display user info (design later)
-        Label(self.user_frame, text="Welcome, " + self.username_info).pack()
-
-        # Search for other user
-        Label(self.user_frame, text="Find friend: ").pack()
-        self.findUser_Entry.pack()
-        Button(self.user_frame, text="Search", command=self.searchFriend).pack()
-
-        # Display user's friend list
-        scrollbar2.pack(side=RIGHT, fill=Y)
-        self.friend_list.pack(side=RIGHT, fill=BOTH, expand=1)
-
-        # Display friend request from other users
-        scrollbar3.pack(side=RIGHT, fill=Y)
-        self.request_list.pack(side=RIGHT, fill=BOTH, expand=1)
-        accept_b.pack(side=TOP)
-        decline_b.pack(side=TOP)
-
-        self.user_frame.pack(side=LEFT, fill=BOTH, expand=1)
-
         # User input field and entry button
-        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont,
-                            insertbackground='#c8c9cb', bg='#484c52', fg='#c8c9cb')
+        entry_field = Entry(self.messages_frame, textvariable=self.my_msg, font=myFont, insertbackground='#c8c9cb',
+                            bg='#484c52', fg='#c8c9cb')
         entry_field.bind("<FocusIn>", lambda args: entry_field.delete('0', 'end'))
-        entry_field.bind("<Return>", self.send)
+        if self.my_msg.get() != "Enter message...":
+            str_msg = self.my_msg.get()
+        else:
+            str_msg = ""
+        entry_field.bind("<Return>", lambda send: (self.send(str_msg), sleep(.1), entry_field.delete('0', 'end')))
         entry_field.pack(side=LEFT, fill=BOTH, expand=1)
-
         # Enter button
-        send_button = Button(self.messages_frame, font=myFont, text="Send", command=self.send, bg='#484c52',
-                             fg='#c8c9cb')
+        send_button = Button(self.messages_frame, font=myFont, text="Send", command=lambda: self.send(str_msg),
+                             bg='#484c52', fg='#c8c9cb')
         send_button.pack(ipadx=5, ipady=5, side=RIGHT, fill=BOTH)
 
-        self.client_socket.connect(self.ADDR)
+    def top_frame(self, frame):
+        frame.tkraise()
 
+    def send_login_info(self):
+        self.send("LOGIN")
+
+        self.login_username = self.login_username_verify.get()
+        self.login_password = self.login_password_verify.get()
+
+        if self.login_username != "" and self.login_password != "":
+            self.send(self.login_username)
+            self.send(self.login_password)
+
+            result = self.client_socket.recv(self.BUFSIZ).decode('utf8')
+            if result == "FAILED_LOGIN":
+                self.login_fail()
+            elif result == "PASS_LOGIN":
+                self.login_success()
+                self.top_frame(self.Chat)
+        else:
+            self.blank_entry()
+
+    def blank_entry(self):
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        self.username_entry1.delete(0, END)
+        self.password_entry1.delete(0, END)
+
+        self.fail_login_screen = Toplevel(self.top)
+        self.fail_login_screen.title("Talkative")
+        self.fail_login_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
+        self.fail_login_screen.config(background='#36393f')
+        Label(self.fail_login_screen, text="There was at least one empty line.", bg='#36393f', fg="red",
+              font=myFont).pack(expand=True)
+        Button(self.fail_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.fail_login_screen)).pack(expand=True)
+
+    def login_fail(self):
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        self.username_entry1.delete(0, END)
+        self.password_entry1.delete(0, END)
+
+        self.fail_login_screen = Toplevel(self.top)
+        self.fail_login_screen.title("Talkative")
+        self.fail_login_screen.geometry(str(int(x/2)) + 'x' + str(int(y/2)))
+        self.fail_login_screen.config(background='#36393f')
+        Label(self.fail_login_screen, text="Incorrect Username/Password.", bg='#36393f', fg="red",
+              font=myFont).pack(expand=True)
+        Button(self.fail_login_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.fail_login_screen)).pack(expand=True)
+
+    def login_success(self):
         receive_thread = Thread(target=self.receive)
         receive_thread.start()
-        self.client_gui.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-    def searchFriend(self):
-        # Get the input and find the user
-        self.foundFriend = self.tempFriend.get()
+    def send_register_info(self):
 
-        self.findUser_Entry.delete(0, END)
+        self.register_username = self.register_username_verify.get()
+        self.register_password = self.register_password_verify.get()
+        self.register_confirm = self.confirm.get()
 
-        self.temp_friend_name = (self.foundFriend,)
-        mycursor.execute(usernameQuery, self.temp_friend_name)
-        msg = mycursor.fetchone()
+        if self.register_username != "" and self.register_password != "" and self.register_confirm != "":
 
-        if msg:
-            # Pop up if the user is found
-            self.friendPopUp = Toplevel(self.client_gui)
-            self.friendPopUp.geometry("200x100")
-            Label(self.friendPopUp, text=self.foundFriend).pack()
-            Button(self.friendPopUp, text="Add", command=self.addFriend).pack()
-        else:
-            # Yield error if user is not in the database
-            self.friendPopUp = Toplevel(self.client_gui)
-            self.friendPopUp.geometry("200x100")
-            Label(self.friendPopUp, text="User " + self.foundFriend + " does not exist!", fg="red").pack()
-            Button(self.friendPopUp, text="Cancel", command=self.friendPopUp.destroy).pack()
+            if self.register_confirm == self.register_password:
+                self.send("REGISTER")
 
-    def addFriend(self):
-        # Get the friend id and check if already add
-        mycursor.execute(getUserId, self.temp_friend_name)
-        friendId = mycursor.fetchone()
+                # self.client_socket.send(bytes(self.register_username, 'utf8'))
+                # self.client_socket.send(bytes(self.register_password, 'utf8'))
+                self.send(self.register_username)
+                self.send(self.register_password)
+                result = self.client_socket.recv(self.BUFSIZ).decode('utf')
 
-        exist_rela = self.userId + friendId + self.userId + friendId
-        request = self.userId + friendId + (0,)
+                if result == "FAILED_TO_REGISTER":
+                    self.register_fail()
+                elif result == "REGISTER_SUCCESS":
+                    self.register_success()
+                    self.top_frame(self.Login)
 
-        mycursor.execute(relationshipQuery, exist_rela)
-        msg = mycursor.fetchall()
-
-        if msg:
-            # Error if already add this person
-            Label(self.friendPopUp, text="Already add " + self.foundFriend + " !!!", fg="red").pack()
-            Button(self.friendPopUp, text="OK", command=self.friendPopUp.destroy).pack()
-        else:
-            if friendId != self.userId:
-                mycursor.execute(addFriend, request)
-                db.commit()
-                Label(self.friendPopUp, text="Successfully add friend!", fg="green").pack()
-                Button(self.friendPopUp, text="OK", command=self.friendPopUp.destroy).pack()
             else:
-                # Error trying to add oneself
-                Label(self.friendPopUp, text="Cannot add yourself!", fg="red").pack()
-                Button(self.friendPopUp, text="OK", command=self.friendPopUp.destroy).pack()
+                self.mismatch_Pass()
+        else:
+            self.blank_entry()
 
-    def accept_request(self):
-        # Switch status in relationship database from 0 to 1
-        select = self.request_list.curselection()
-        for i in select:
-            temp = (self.request_list.get(i),)
-            mycursor.execute(getUserId, temp)
-            tempId = mycursor.fetchone()
-            mycursor.execute(acceptRequest, tempId + self.userId)
-            db.commit()
-            self.request_list.delete(i)
-        self.friend_list.insert(END, temp)
+    def register_fail(self):
+        self.username_entry2.delete(0, END)
+        self.password_entry2.delete(0, END)
+        self.confirm_pass.delete(0, END)
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
 
-    def decline_request(self):
-        # Delete the relationship row if the request is decline
-        select = self.request_list.curselection()
-        for i in select:
-            temp = (self.request_list.get(i),)
-            mycursor.execute(getUserId, temp)
-            tempId = mycursor.fetchone()
-            mycursor.execute(declineRequest, tempId + self.userId)
-            db.commit()
-            self.request_list.delete(i)
+        self.fail_reg_screen = Toplevel(self.top)
+        self.fail_reg_screen.title("Talkative")
+        self.fail_reg_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
+        self.fail_reg_screen.config(background='#36393f')
+        Label(self.fail_reg_screen, text="That username already exists.\n Try again.", bg='#36393f', fg="red",
+              font=myFont).pack(expand=True)
+        Button(self.fail_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.fail_reg_screen)).pack(expand=True)
+
+    def mismatch_Pass(self):
+        self.username_entry2.delete(0, END)
+        self.password_entry2.delete(0, END)
+        self.confirm_pass.delete(0, END)
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+
+        self.fail_reg_screen = Toplevel(self.top)
+        self.fail_reg_screen.title("Talkative")
+        self.fail_reg_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
+        self.fail_reg_screen.config(background='#36393f')
+        Label(self.fail_reg_screen, text="Passwords do not match.", bg='#36393f', fg="red",
+              font=myFont).pack(expand=True)
+        Button(self.fail_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.fail_reg_screen)).pack(expand=True)
+
+    def register_success(self):
+        myFont = font.Font(family='Helvetica', size=int(x / 50))
+        self.success_reg_screen = Toplevel(self.top)
+        self.success_reg_screen.title("Talkative")
+        self.success_reg_screen.geometry(str(int(x / 2)) + 'x' + str(int(y / 2)))
+        self.success_reg_screen.config(background='#36393f')
+        Label(self.success_reg_screen, text="Successfully registered.", bg='#36393f', fg="green",
+              font=myFont).pack(expand=True)
+        Button(self.success_reg_screen, text="OK", font=myFont, bg='#484c52', fg='#c8c9cb',
+               command=lambda: self.delete_screen(self.success_reg_screen)).pack(expand=True)
+
+    def send(self, msg, event=None):
+        check_msg = self.my_msg.get()
+        if check_msg != "Enter message...":
+            msg = check_msg
+            print(msg)
+        sleep(.5)
+        self.client_socket.send(bytes(msg, 'utf8'))
+        if msg == "QUIT":
+            os._exit(0)
+
+    def receive(self):
+        while True:
+            try:
+                msg = self.client_socket.recv(self.BUFSIZ).decode('utf8')
+                self.msg_list.insert(END, msg)
+            except OSError:  # Possibly client has left the chat.
+                break
+
+    def delete_screen(self, x):
+        x.destroy()
 
 
 if __name__ == "__main__":
-    obj = reg_login()
-    obj.main_screen()
+    root = Tk()
+    root.title("Talkative")
+    x = int(root.winfo_screenwidth()/1.5)
+    y = int(root.winfo_screenwidth()/2.67)
+    root.geometry(str(x) + 'x' + str(y))
+    # root.resizable(0, 0)
+    reg_login(root)
+    root.mainloop()
