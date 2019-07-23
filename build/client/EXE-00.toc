@@ -37,7 +37,7 @@
  [],
  False,
  False,
- 1563759199,
+ 1563918618,
  [('run.exe',
    'c:\\users\\kevin\\desktop\\talkative\\talkative\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-32bit\\run.exe',
    'EXECUTABLE')])
